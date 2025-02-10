@@ -92,6 +92,8 @@
 #include "moc_mainwindow.cpp"
 #include "Logger.hpp"
 
+#include "WebSockets.hpp"
+
 #define FCL fortran_charlen_t
 
 extern "C" {
@@ -1048,6 +1050,14 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   ui->labDXped->setVisible(SpecOp::NONE != m_specOp);
   ui->labDXped->setStyleSheet("QLabel {background-color: red; color: white;}");
   ui->pbBestSP->setVisible(m_mode=="FT4");
+
+// <!-- WebSockets START
+
+  WebSockets *w = new WebSockets(14444);
+//  w->SendToClient("Hello client!");
+  w = w;
+
+// WebSockets END -->
 
 // this must be the last statement of constructor
   if (!m_valid) throw std::runtime_error {"Fatal initialization exception"};

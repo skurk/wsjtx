@@ -45,6 +45,7 @@
 #include "WSJTXLogging.hpp"
 #include "MultiSettings.hpp"
 #include "widgets/mainwindow.h"
+#include "widgets/WebSockets.hpp"
 #include "commons.h"
 #include "lib/init_random_seed.h"
 #include "Radio.hpp"

@@ -260,6 +260,7 @@ set (wsjtx_CXXSRCS
   Detector/Detector.cpp
   widgets/logqso.cpp
   widgets/displaytext.cpp
+  widgets/WebSockets.cpp
   Decoder/decodedtext.cpp
   getfile.cpp
   Audio/soundout.cpp
@@ -901,7 +902,7 @@ find_package (Usb REQUIRED)
 #
 
 # Widgets finds its own dependencies.
-find_package (Qt5 COMPONENTS Widgets SerialPort Multimedia PrintSupport Sql LinguistTools REQUIRED)
+find_package (Qt5 COMPONENTS WebSockets Widgets SerialPort Multimedia PrintSupport Sql LinguistTools REQUIRED)
 
 if (WIN32)
   add_definitions (-DQT_NEEDS_QTMAIN)
@@ -1351,13 +1352,13 @@ endif (WIN32)
 # build a library for the QCustomPlot widget
 add_library (qcp STATIC ${qcp_CXXSRCS})
 target_include_directories (qcp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/qcustomplot-source>)
-target_link_libraries (qcp Qt5::Widgets Qt5::PrintSupport)
+target_link_libraries (qcp Qt5::WebSockets Qt5::Widgets Qt5::PrintSupport)
 
 # build a library of package Qt functionality
 add_library (wsjt_qt STATIC ${wsjt_qt_CXXSRCS} ${wsjt_qt_GENUISRCS} ${GENAXSRCS})
 # set wsjtx_udp exports to static variants
 target_compile_definitions (wsjt_qt PUBLIC UDP_STATIC_DEFINE)
-target_link_libraries (wsjt_qt Hamlib::Hamlib Boost::log qcp Qt5::Widgets Qt5::Network Qt5::Sql)
+target_link_libraries (wsjt_qt Hamlib::Hamlib Boost::log qcp Qt5::WebSockets Qt5::Widgets Qt5::Network Qt5::Sql)
 if (WIN32)
   target_link_libraries (wsjt_qt Qt5::AxContainer Qt5::AxBase)
 endif (WIN32)
@@ -1535,7 +1536,7 @@ add_executable (message_aggregator
   ${message_aggregator_RESOURCES_RCC}
   ${message_aggregator_VERSION_RESOURCES}
   )
-target_link_libraries (message_aggregator wsjt_qt Qt5::Widgets wsjtx_udp-static)
+target_link_libraries (message_aggregator wsjt_qt Qt5::WebSockets Qt5::Widgets wsjtx_udp-static)
 
 if (WSJT_CREATE_WINMAIN)
   set_target_properties (message_aggregator PROPERTIES WIN32_EXECUTABLE ON)

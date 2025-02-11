@@ -5,7 +5,10 @@
   <canvas id="waterfall" width="1024" height="256"></canvas>
 </div>
 <div>
+  <input id="stopButton" type="button" value="Stop" onClick="stopButtonClicked()">
+  <input id="eraseButton" type="button" value="Erase" onClick="eraseButtonClicked()">
   <input id="autoButton" type="button" value="Enable Tx" onClick="autoButtonClicked()">
+  <input id="haltTxButton" type="button" value="Halt Tx" onClick="haltButtonClicked()">
 </div>
 
 <script>
@@ -20,6 +23,8 @@ socket.onopen = () => {
 }
 socket.onmessage = (message) => {
   var content = message.data.toString();
+  console.log("Received: " + content);
+
   if(content.startsWith("WaterFall:"))
   {
     console.log("Waterfall data received");
@@ -64,6 +69,9 @@ socket.onmessage = (message) => {
 }
 function autoButtonClicked() {
   socket.send('Event:Button:autoButton');
+}
+function haltButtonClicked() {
+  socket.send('Event:Button:haltButton');
 }
 </script>
 

@@ -94,6 +94,8 @@
 
 #include "WebSockets.hpp"
 
+WebSockets *wc;
+
 #define FCL fortran_charlen_t
 
 extern "C" {
@@ -1053,9 +1055,24 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
 // <!-- WebSockets START
 
-  WebSockets *w = new WebSockets(14444);
-//  w->SendToClient("Hello client!");
-  w = w;
+  wc = new WebSockets(14444);
+
+// Connect various buttons to signals emitted by web ui
+
+  connect(wc, &WebSockets::autoButtonClicked, this, [this] {
+    ui->autoButton->click();
+    QString response = "Event:Button:autoButton:";
+    response += (m_auto?"disabled":"enabled");
+    wc->writeToClient(response);
+  });
+
+  connect(wc, &WebSockets::haltButtonClicked, this, [this] {
+    ui->stopTxButton->click();
+
+    QString response = "Event:Button:autoButton:";
+    response += (m_auto?"disabled":"enabled");
+    wc->writeToClient(response);
+  });
 
 // WebSockets END -->
 

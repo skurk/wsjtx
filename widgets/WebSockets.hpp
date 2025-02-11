@@ -11,11 +11,17 @@ namespace Ui {
 
 class WebSockets : public QObject
 {
+  Q_OBJECT;
+
   public:
     explicit WebSockets(quint16 port, QObject *parent = nullptr);
+    void writeToClient(QString message);
   private:
     QWebSocketServer *socketServer;
+    QWebSocket *conn;
   signals:
+    void autoButtonClicked();
+    void haltButtonClicked();
   private slots:
     void onNewConnection();
     void textMessageReceived(QString message);

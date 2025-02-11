@@ -1,0 +1,71 @@
+<html>
+<body>
+
+<div>
+  <canvas id="waterfall" width="1024" height="256"></canvas>
+</div>
+<div>
+  <input id="autoButton" type="button" value="Enable Tx" onClick="autoButtonClicked()">
+</div>
+
+<script>
+let socket=new WebSocket("ws://localhost:14444");
+var c = document.getElementById("waterfall");
+var ctx = c.getContext("2d");
+socket.onopen = () => {
+  console.log("socket open");
+  socket.send('test from javascript');
+  ctx.fillStyle="#000000";
+  ctx.fillRect(0,0,1024,256);
+}
+socket.onmessage = (message) => {
+  var content = message.data.toString();
+  if(content.startsWith("WaterFall:"))
+  {
+    console.log("Waterfall data received");
+    content = content.replace(/^WaterFall:/, "");
+    var img = ctx.getImageData(0,0,1024,255);
+    ctx.putImageData(img, 0, 1);
+    var pixels=content.split(',');
+    for(i=0; i<pixels.length; i++)
+    {
+      ctx.fillStyle=pixels[i];
+      ctx.fillRect(i, 0, 1, 1);
+    }
+  }
+  else if(content.startsWith("Event:"))
+  {
+    console.log("Event received");
+    content = content.replace(/^Event:/, "");
+    if(content.startsWith("Button:"))
+    {
+      console.log("Button press received");
+      content = content.replace(/^Button:/, "");
+      if(content.startsWith("autoButton:"))
+      {
+        content = content.replace(/^autoButton:/, "");
+        if(content == "enabled")
+        {
+          document.getElementById("autoButton").style.background = "";
+        }
+        else
+        {
+          document.getElementById("autoButton").style.background = "#ff0000";
+        }
+      }
+      else
+      {
+        console.log("Unknown button: " + content);
+      }
+    } else {
+      console.log("Unknown event: " + content);
+    }
+  }
+}
+function autoButtonClicked() {
+  socket.send('Event:Button:autoButton');
+}
+</script>
+
+</body>
+</html>

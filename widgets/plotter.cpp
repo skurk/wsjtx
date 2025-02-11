@@ -188,6 +188,7 @@ void CPlotter::draw(float swide[], bool bScroll, bool bRed)
     int irow=-1;
     plotsave_(swide,&m_w,&m_h1,&irow);
   }
+  g_WaterFall.clear();
   for(int i=0; i<iz; i++) {
     y=swide[i];
     if(y<ymin) ymin=y;
@@ -196,7 +197,9 @@ void CPlotter::draw(float swide[], bool bScroll, bool bRed)
     if (y1>254) y1=254;
     if (swide[i]<1.e29) painter1.setPen(g_ColorTbl[y1]);
     painter1.drawPoint(i,m_j);
+    g_WaterFall << y1;
   }
+
   m_line++;
 
   float y2min=1.e30;

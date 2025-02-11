@@ -9,33 +9,63 @@
   <input id="eraseButton" type="button" value="Erase" onClick="eraseButtonClicked()">
   <input id="autoButton" type="button" value="Enable Tx" onClick="autoButtonClicked()">
   <input id="haltTxButton" type="button" value="Halt Tx" onClick="haltButtonClicked()">
+  <input id="callSign" type="text" value="">
 </div>
 
 <script>
 let socket=new WebSocket("ws://localhost:14444");
 var c = document.getElementById("waterfall");
 var ctx = c.getContext("2d");
+const palette = [];
+
 socket.onopen = () => {
   console.log("socket open");
-  socket.send('test from javascript');
+  socket.send('Request:Settings');
   ctx.fillStyle="#000000";
   ctx.fillRect(0,0,1024,256);
 }
 socket.onmessage = (message) => {
   var content = message.data.toString();
-  console.log("Received: " + content);
+//  console.log("Received: " + content);
 
   if(content.startsWith("WaterFall:"))
   {
-    console.log("Waterfall data received");
     content = content.replace(/^WaterFall:/, "");
-    var img = ctx.getImageData(0,0,1024,255);
+    console.log("Waterfall data received ");
+
+    var img = ctx.getImageData(0,0,1024,254);
     ctx.putImageData(img, 0, 1);
+
     var pixels=content.split(',');
+
+//    document.getElementById("waterfall").width = (pixels.length)-1;
+
     for(i=0; i<pixels.length; i++)
     {
-      ctx.fillStyle=pixels[i];
+      var ii = (Number("0x"+pixels[i]));
+      ctx.fillStyle=palette[ii];
       ctx.fillRect(i, 0, 1, 1);
+    }
+  }
+  else if(content.startsWith("Settings:"))
+  {
+    content = content.replace(/^Settings:/, "");
+
+    if(content.startsWith("Palette:"))
+    {
+      content = content.replace(/^Palette:/, "");
+      const cols = content.split(',');
+      for(var i=0; i<(cols.length-1); i++)
+      {
+        palette.push(cols[i]);
+      }
+      console.log("Waterfall palette of " + (cols.length-1) + " entries received");
+    }
+    else if(content.startsWith("CallSign:"))
+    {
+      content = content.replace(/^CallSign:/, "");
+      console.log("Received current callsign: " + content);
+      document.getElementById("callSign").value = content;
     }
   }
   else if(content.startsWith("Event:"))

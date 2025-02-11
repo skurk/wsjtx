@@ -54,6 +54,7 @@ public:
   void   restartTotalPower();
 
 signals:
+  void waterfallUpdated();
   void freezeDecode2(int n);
   void f11f12(int n);
   void setXIT2(int n);
@@ -93,7 +94,9 @@ private:
 
   QScopedPointer<Ui::WideGraph> ui;
 
+public:
   QSettings * m_settings;
+private:
   QDir m_palettes_path;
   WFPalette m_userPalette;
   QHash<QString, QVariant> m_fMinPerBand;

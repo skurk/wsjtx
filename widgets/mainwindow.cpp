@@ -209,6 +209,7 @@ int   fast_jhpeak {0};
 int   fast_jh2 {0};
 int narg[15];
 QVector<QColor> g_ColorTbl;
+QVector<unsigned char> g_WaterFall;
 
 using SpecOp = Configuration::SpecialOperatingActivity;
 
@@ -1073,6 +1074,31 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     response += (m_auto?"disabled":"enabled");
     wc->writeToClient(response);
   });
+
+  connect(wc, &WebSockets::settingsRequested, this, [this] {
+    QString response = "Settings:CallSign:LB5SH";
+    wc->writeToClient(response);
+
+    response = "Settings:Palette:";
+    for(int i=0; i<g_ColorTbl.size(); i++)
+    {
+      response += g_ColorTbl[i].name();
+      response += ",";
+    }
+    wc->writeToClient(response);
+  });
+
+  connect(m_wideGraph.data(), &WideGraph::waterfallUpdated, this, [this] {
+    QString response = "WaterFall:";
+
+    for(int i=0; i<g_WaterFall.size(); i++)
+    {
+      response += QString::number(g_WaterFall[i],16);
+      response += ",";
+    }
+    wc->writeToClient(response);
+  });
+
 
 // WebSockets END -->
 
@@ -2654,12 +2680,6 @@ void MainWindow::closeEvent(QCloseEvent * e)
   mem_jt9->detach();
   Q_EMIT finished ();
   QMainWindow::closeEvent (e);
-
-  if(wc)
-  {
-    printf("Closing WebSocket server\n");
-    wc->close();
-  }
 }
 
 void MainWindow::on_stopButton_clicked()                       //stopButton

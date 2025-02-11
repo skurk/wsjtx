@@ -49,6 +49,10 @@ void WebSockets::textMessageReceived(QString message)
     {
       emit haltButtonClicked();
     }
+    if(message == "Request:Settings")
+    {
+      emit settingsRequested();
+    }
     conn->sendTextMessage("Ok");
     conn->flush();
   }

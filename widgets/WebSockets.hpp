@@ -22,6 +22,7 @@ class WebSockets : public QObject
   signals:
     void autoButtonClicked();
     void haltButtonClicked();
+    void settingsRequested();
   private slots:
     void onNewConnection();
     void textMessageReceived(QString message);

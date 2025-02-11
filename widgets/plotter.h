@@ -146,7 +146,10 @@ private:
   qint32  m_nUTC;
   qint32  m_x=0;
 
+public:
   QPixmap m_WaterfallPixmap;
+
+private:
   QPixmap m_2DPixmap;
   QPixmap m_ScalePixmap;
   QPixmap m_OverlayPixmap;
@@ -197,5 +200,6 @@ private:
 };
 
 extern QVector<QColor> g_ColorTbl;
+extern QVector<unsigned char> g_WaterFall;
 
 #endif // PLOTTER_H

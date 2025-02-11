@@ -15,13 +15,11 @@ class WebSockets : public QObject
     explicit WebSockets(quint16 port, QObject *parent = nullptr);
   private:
     QWebSocketServer *socketServer;
-//    QWebSocket *socket;
   signals:
-//    void closed();
   private slots:
-//    void onNewConnection();
-//    void processTextMessage(QString message);
-//    void socketDisconnected();
+    void onNewConnection();
+    void textMessageReceived(QString message);
+    void disconnected();
 };
 
 #endif

@@ -1613,6 +1613,9 @@ void MainWindow::dataSink(qint64 frames)
     DecodedText decodedtext {t};
     ui->decodedTextBrowser->displayDecodedText (decodedtext, m_config.my_callsign(),
           m_mode, m_config.DXCC(), m_logBook, m_currentBand, m_config.ppfx());
+
+    printf("ui->decodedTextBrowser: %s\n", t.toStdString().c_str());
+
     if (ui->measure_check_box->isChecked ()) {
       // Append results text to file "fmt.all".
       QFile f {m_config.writeable_data_dir ().absoluteFilePath ("fmt.all")};
@@ -2651,6 +2654,12 @@ void MainWindow::closeEvent(QCloseEvent * e)
   mem_jt9->detach();
   Q_EMIT finished ();
   QMainWindow::closeEvent (e);
+
+  if(wc)
+  {
+    printf("Closing WebSocket server\n");
+    wc->close();
+  }
 }
 
 void MainWindow::on_stopButton_clicked()                       //stopButton

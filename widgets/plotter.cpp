@@ -188,6 +188,8 @@ void CPlotter::draw(float swide[], bool bScroll, bool bRed)
     int irow=-1;
     plotsave_(swide,&m_w,&m_h1,&irow);
   }
+
+  /* Add waterfall data to vector array */
   g_WaterFall.clear();
   for(int i=0; i<iz; i++) {
     y=swide[i];

@@ -1058,6 +1058,8 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
 // Connect various buttons to signals emitted by web ui
 
+//void MainWindow::setFreq4(int rxFreq, int txFreq)
+
   connect(ws, &WebSockets::autoButtonClicked, this, [this] {
     ui->autoButton->click();
     QString response = "Event:Button:autoButton:";

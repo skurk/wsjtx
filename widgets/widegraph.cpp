@@ -205,6 +205,8 @@ void WideGraph::dataSink2(float s[], float df3, int ihsym, int ndiskdata, float 
     m_tr0=tr;
     ui->widePlot->draw(m_swide,true,false);
   }
+
+  /* signal to socket that we have new waterfall data ready */
   emit waterfallUpdated();
 }
 

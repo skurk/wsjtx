@@ -60,14 +60,27 @@ void WebSockets::textMessageReceived(QString message)
     {
       emit autoButtonClicked();
     }
-    if(message == "Event:Button:haltButton")
+    else if(message == "Event:Button:haltButton")
     {
       emit haltButtonClicked();
     }
-    if(message == "Request:Settings")
+    else if(message == "Request:Settings")
     {
       emit settingsRequested();
     }
+    else if(message.startsWith("Event:TxFreq:"))
+    {
+      message.replace("Event:TxFreq:", "");
+      int txf = atoi(message.toStdString().c_str());
+      emit setTxFreq(txf);
+    }
+    else if(message.startsWith("Event:RxFreq:"))
+    {
+      message.replace("Event:RxFreq:", "");
+      int rxf = atoi(message.toStdString().c_str());
+      emit setRxFreq(rxf);
+    }
+
     c->sendTextMessage("Ok");
     c->flush();
   }

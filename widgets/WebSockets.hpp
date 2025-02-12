@@ -25,6 +25,8 @@ class WebSockets : public QObject
     void autoButtonClicked();
     void haltButtonClicked();
     void settingsRequested();
+    void setTxFreq(int txf);
+    void setRxFreq(int rxf);
   private slots:
     void onNewConnection();
     void textMessageReceived(QString message);

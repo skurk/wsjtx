@@ -1,15 +1,62 @@
 <html>
+<style>
+body {
+  width: 1024px;
+}
+.main {
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 100%;
+  background: #d8d8d8;
+}
+</style>
 <body>
 
+<div class="main">
 <div>
-  <canvas id="waterfall" width="1024" height="256"></canvas>
+  <canvas id="waterfall" width="1024" height="128"></canvas>
 </div>
+<br />
+<div>
+  <select name="lb" size="10" style="width: 500px;">
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+  </select>
+  <select name="rb" size="10" style="width: 500px; float: right;">
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+    <option value=""></option>
+  </select>
+</div>
+
+<br />
+
 <div>
   <input id="stopButton" type="button" value="Stop" onClick="stopButtonClicked()">
   <input id="eraseButton" type="button" value="Erase" onClick="eraseButtonClicked()">
   <input id="autoButton" type="button" value="Enable Tx" onClick="autoButtonClicked()">
   <input id="haltTxButton" type="button" value="Halt Tx" onClick="haltButtonClicked()">
   <input id="callSign" type="text" value="">
+</div>
+
+<br />
+
 </div>
 
 <script>
@@ -33,7 +80,7 @@ socket.onmessage = (message) => {
     content = content.replace(/^WaterFall:/, "");
     console.log("Waterfall data received ");
 
-    var img = ctx.getImageData(0,0,1024,254);
+    var img = ctx.getImageData(0,0,1024,127);
     ctx.putImageData(img, 0, 1);
 
     var pixels=content.split(',');

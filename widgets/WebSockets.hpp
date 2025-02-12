@@ -15,10 +15,12 @@ class WebSockets : public QObject
 
   public:
     explicit WebSockets(quint16 port, QObject *parent = nullptr);
+    ~WebSockets();
     void writeToClient(QString message);
   private:
     QWebSocketServer *socketServer;
-    QWebSocket *conn;
+//    QWebSocket *conn;
+    QList<QWebSocket *> clients;
   signals:
     void autoButtonClicked();
     void haltButtonClicked();

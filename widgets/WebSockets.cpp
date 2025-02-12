@@ -8,7 +8,6 @@ WebSockets::WebSockets(quint16 port, QObject *parent) :
                                              QWebSocketServer::NonSecureMode,
                                              this))
 {
-
   if(socketServer->listen(QHostAddress::Any, port))
   {
     printf("WebSocket constructor: init port=%d\n", (int)port);
@@ -17,29 +16,37 @@ WebSockets::WebSockets(quint16 port, QObject *parent) :
   }
 }
 
+WebSockets::~WebSockets()
+{
+  socketServer->close();
+}
+
 void WebSockets::onNewConnection()
 {
-  conn = socketServer->nextPendingConnection();
+  QWebSocket *conn = socketServer->nextPendingConnection();
   connect(conn, &QWebSocket::textMessageReceived,
           this, &WebSockets::textMessageReceived);
   connect(conn, &QWebSocket::disconnected,
           this, &WebSockets::disconnected);
+
+  clients << conn;
 }
 
 void WebSockets::writeToClient(QString message)
 {
-  if(conn)
+  QWebSocket *c = qobject_cast<QWebSocket *>(sender());
+  if(c)
   {
-    conn->sendTextMessage(message);
-    conn->flush();
+    c->sendTextMessage(message);
+    c->flush();
   }
 }
 
 void WebSockets::textMessageReceived(QString message)
 {
   printf("Message received: %s\n", message.toStdString().c_str());
-//  QWebSocket *c = qobject_cast<QWebSocket *>(sender());
-  if(conn)
+  QWebSocket *c = qobject_cast<QWebSocket *>(sender());
+  if(c)
   {
     if(message == "Event:Button:autoButton")
     {
@@ -53,14 +60,15 @@ void WebSockets::textMessageReceived(QString message)
     {
       emit settingsRequested();
     }
-    conn->sendTextMessage("Ok");
-    conn->flush();
+    c->sendTextMessage("Ok");
+    c->flush();
   }
 }
 
 void WebSockets::disconnected()
 {
-//  QWebSocket *c = qobject_cast<QWebSocket *>(sender());
-  conn->deleteLater();
+  QWebSocket *c = qobject_cast<QWebSocket *>(sender());
+  c->deleteLater();
+//  conn->deleteLater();
 }
 

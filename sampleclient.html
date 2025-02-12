@@ -119,7 +119,21 @@ socket.onmessage = (message) => {
   {
     content = content.replace(/^Settings:/, "");
 
-    if(content.startsWith("Palette:"))
+    if(content.startsWith("RxFreq:"))
+    {
+      console.log("Received RxFreq");
+      content = content.replace(/^RxFreq:/, "");
+      rxFreq = (parseInt(content)/3)-25;
+      redrawRxTxBars();
+    }
+    else if(content.startsWith("TxFreq:"))
+    {
+      console.log("Received TxFreq");
+      content = content.replace(/^TxFreq:/, "");
+      txFreq = (parseInt(content)/3)-25;
+      redrawRxTxBars();
+    }
+    else if(content.startsWith("Palette:"))
     {
       content = content.replace(/^Palette:/, "");
       const cols = content.split(',');

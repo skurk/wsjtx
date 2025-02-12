@@ -55,6 +55,8 @@ public:
 
 signals:
   void waterfallUpdated();
+  void tellRxFreq(int n);
+  void tellTxFreq(int n);
   void freezeDecode2(int n);
   void f11f12(int n);
   void setXIT2(int n);

@@ -1074,9 +1074,11 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   });
 
   connect(ws, &WebSockets::settingsRequested, this, [this] {
+    // Current callsign
     QString response = "Settings:CallSign:LB5SH";
     ws->writeToClient(response);
 
+    // Waterfall palette
     response = "Settings:Palette:";
     for(int i=0; i<g_ColorTbl.size(); i++)
     {
@@ -1084,6 +1086,14 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
       response += ",";
     }
     ws->writeToClient(response);
+
+    // RX and TX freq
+    response = "Settings:RxFreq:" + QString::number(ui->RxFreqSpinBox->value());
+    ws->writeToClient(response);
+
+    response = "Settings:TxFreq:" + QString::number(ui->TxFreqSpinBox->value());
+    ws->writeToClient(response);
+
   });
 
   connect(ws, &WebSockets::setTxFreq, this, [this](int txf) {
@@ -1104,6 +1114,18 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     }
     ws->writeToClient(response);
   });
+
+
+  connect(m_wideGraph.data(), &WideGraph::tellRxFreq, this, [this](int rxf) {
+    QString message = "Settings:RxFreq:" + QString::number(rxf);
+    ws->writeToClient(message);
+  });
+
+  connect(m_wideGraph.data(), &WideGraph::tellTxFreq, this, [this](int txf) {
+    QString message = "Settings:TxFreq:" + QString::number(txf);
+    ws->writeToClient(message);
+  });
+
 
 
 // WebSockets END -->

@@ -243,6 +243,7 @@ void WideGraph::keyPressEvent(QKeyEvent *e)                                 //F1
 
 void WideGraph::setRxFreq(int n)                                           //setRxFreq
 {
+  emit tellRxFreq(n);
   ui->widePlot->setRxFreq(n);
   if(m_mode!="Q65") ui->widePlot->draw(m_swide,false,false);
 }
@@ -293,6 +294,7 @@ void WideGraph::setPeriod(double trperiod, int nsps)                  //SetPerio
 
 void WideGraph::setTxFreq(int n)                                   //setTxFreq
 {
+  emit tellTxFreq(n);
   emit setXIT2(n);
   ui->widePlot->setTxFreq(n);
 }

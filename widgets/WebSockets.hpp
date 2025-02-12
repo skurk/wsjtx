@@ -19,7 +19,7 @@ class WebSockets : public QObject
     void writeToClient(QString message);
   private:
     QWebSocketServer *socketServer;
-//    QWebSocket *conn;
+    QWebSocket *current;
     QList<QWebSocket *> clients;
   signals:
     void autoButtonClicked();

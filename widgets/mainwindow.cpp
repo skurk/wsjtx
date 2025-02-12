@@ -94,8 +94,6 @@
 
 #include "WebSockets.hpp"
 
-WebSockets *wc;
-
 #define FCL fortran_charlen_t
 
 extern "C" {
@@ -1056,28 +1054,28 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
 // <!-- WebSockets START
 
-  wc = new WebSockets(14444);
+  ws = new WebSockets(14444);
 
 // Connect various buttons to signals emitted by web ui
 
-  connect(wc, &WebSockets::autoButtonClicked, this, [this] {
+  connect(ws, &WebSockets::autoButtonClicked, this, [this] {
     ui->autoButton->click();
     QString response = "Event:Button:autoButton:";
     response += (m_auto?"disabled":"enabled");
-    wc->writeToClient(response);
+    ws->writeToClient(response);
   });
 
-  connect(wc, &WebSockets::haltButtonClicked, this, [this] {
+  connect(ws, &WebSockets::haltButtonClicked, this, [this] {
     ui->stopTxButton->click();
 
     QString response = "Event:Button:autoButton:";
     response += (m_auto?"disabled":"enabled");
-    wc->writeToClient(response);
+    ws->writeToClient(response);
   });
 
-  connect(wc, &WebSockets::settingsRequested, this, [this] {
+  connect(ws, &WebSockets::settingsRequested, this, [this] {
     QString response = "Settings:CallSign:LB5SH";
-    wc->writeToClient(response);
+    ws->writeToClient(response);
 
     response = "Settings:Palette:";
     for(int i=0; i<g_ColorTbl.size(); i++)
@@ -1085,7 +1083,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
       response += g_ColorTbl[i].name();
       response += ",";
     }
-    wc->writeToClient(response);
+    ws->writeToClient(response);
   });
 
   connect(m_wideGraph.data(), &WideGraph::waterfallUpdated, this, [this] {
@@ -1096,7 +1094,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
       response += QString::number(g_WaterFall[i],16);
       response += ",";
     }
-    wc->writeToClient(response);
+    ws->writeToClient(response);
   });
 
 

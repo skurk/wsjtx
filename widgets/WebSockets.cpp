@@ -24,6 +24,7 @@ WebSockets::~WebSockets()
 void WebSockets::onNewConnection()
 {
   QWebSocket *conn = socketServer->nextPendingConnection();
+  current = conn;
   connect(conn, &QWebSocket::textMessageReceived,
           this, &WebSockets::textMessageReceived);
   connect(conn, &QWebSocket::disconnected,
@@ -34,11 +35,18 @@ void WebSockets::onNewConnection()
 
 void WebSockets::writeToClient(QString message)
 {
-  QWebSocket *c = qobject_cast<QWebSocket *>(sender());
-  if(c)
+  foreach(QWebSocket *c,  clients)
   {
-    c->sendTextMessage(message);
-    c->flush();
+//    QWebSocket *c = qobject_cast<QWebSocket *>(sender());
+    if(c)
+    {
+      c->sendTextMessage(message);
+      c->flush();
+    }
+    else
+    {
+      printf("Unable to send to client (socket not open)\n");
+    }
   }
 }
 
@@ -69,6 +77,5 @@ void WebSockets::disconnected()
 {
   QWebSocket *c = qobject_cast<QWebSocket *>(sender());
   c->deleteLater();
-//  conn->deleteLater();
 }
 

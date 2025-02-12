@@ -26,7 +26,7 @@ socket.onopen = () => {
 }
 socket.onmessage = (message) => {
   var content = message.data.toString();
-//  console.log("Received: " + content);
+  //console.log("Received: " + content);
 
   if(content.startsWith("WaterFall:"))
   {
@@ -37,8 +37,6 @@ socket.onmessage = (message) => {
     ctx.putImageData(img, 0, 1);
 
     var pixels=content.split(',');
-
-//    document.getElementById("waterfall").width = (pixels.length)-1;
 
     for(i=0; i<pixels.length; i++)
     {

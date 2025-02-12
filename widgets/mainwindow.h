@@ -43,6 +43,8 @@
 #include "MessageBox.hpp"
 #include "Network/NetworkAccessManager.hpp"
 
+#include "WebSockets.hpp"
+
 #define NUM_JT4_SYMBOLS 206                //(72+31)*2, embedded sync
 #define NUM_JT65_SYMBOLS 126               //63 data + 63 sync
 #define NUM_JT9_SYMBOLS 85                 //69 data + 16 sync
@@ -136,6 +138,7 @@ public slots:
   void fastPick(int x0, int x1, int y);
 
 private:
+  WebSockets *ws;
   void change_layout (std::size_t) override;
   void keyPressEvent (QKeyEvent *) override;
   void closeEvent(QCloseEvent *) override;

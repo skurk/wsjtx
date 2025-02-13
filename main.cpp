@@ -53,6 +53,8 @@
 #include "widgets/SplashScreen.hpp"
 #include "widgets/MessageBox.hpp"       // last to avoid nasty MS macro definitions
 
+#include "SignalMonitor.hpp"
+
 extern "C" {
   // Fortran procedures we need
   void four2a_(_Complex float *, int * nfft, int * ndim, int * isign, int * iform, int len);
@@ -434,6 +436,26 @@ int main(int argc, char *argv[])
           MainWindow w(temp_dir, multiple, &multi_settings, &mem_jt9, downSampleFactor, &splash, env);
           w.show();
           splash.raise ();
+
+          // <!-- SignalMonitor START
+
+          SignalMonitor *sm = new SignalMonitor();
+          QMetaMethod notify = sm->metaObject()->method(sm->metaObject()->indexOfSlot("Notify()"));
+          for(auto widget: a.allWidgets())
+          {
+            auto metaObject = widget->metaObject();
+            for(int i=0; i != metaObject->methodCount(); ++i)
+            {
+              auto method = metaObject->method(i);
+              if(method.methodType() != QMetaMethod::Signal) continue;
+              widget->connect(widget, method, sm, notify);
+            }
+          }
+
+          // SignalMonitor END -->
+
+
+
           QObject::connect (&a, SIGNAL (lastWindowClosed()), &a, SLOT (quit()));
           result = a.exec();
 

@@ -70,7 +70,8 @@ SOURCES += \
   WSPRBandHopping.cpp MessageAggregator.cpp SampleDownloader.cpp qt_helpers.cpp\
   MultiSettings.cpp PhaseEqualizationDialog.cpp \
   EqualizationToolsDialog.cpp \
-  LotWUsers.cpp TraceFile.cpp
+  LotWUsers.cpp TraceFile.cpp \
+  SignalMonitor.cpp
 
 HEADERS  += qt_helpers.hpp qt_db_helpers.hpp \
   helper_functions.h \
@@ -84,7 +85,8 @@ HEADERS  += qt_helpers.hpp qt_db_helpers.hpp \
   WSPRBandHopping.hpp \
   WsprTxScheduler.h SampleDownloader.hpp MultiSettings.hpp PhaseEqualizationDialog.hpp \
   EqualizationToolsDialog.hpp \
-  LotWUsers.h TraceFile.hpp NonInheritingProcess.hpp
+  LotWUsers.h TraceFile.hpp NonInheritingProcess.hpp \
+  SignalMonitor.hpp
 
 INCLUDEPATH += qmake_only
 

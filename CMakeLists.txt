@@ -261,6 +261,7 @@ set (wsjtx_CXXSRCS
   widgets/logqso.cpp
   widgets/displaytext.cpp
   widgets/WebSockets.cpp
+  SignalMonitor.cpp
   Decoder/decodedtext.cpp
   getfile.cpp
   Audio/soundout.cpp

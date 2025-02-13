@@ -1126,8 +1126,6 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     ws->writeToClient(message);
   });
 
-
-
 // WebSockets END -->
 
 // this must be the last statement of constructor

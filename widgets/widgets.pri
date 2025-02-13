@@ -1,4 +1,5 @@
 SOURCES += \
+  SignalMonitor.cpp \
   widgets/astro.cpp widgets/LettersSpinBox.cpp \
   widgets/logqso.cpp widgets/displaytext.cpp \
   widgets/meterwidget.cpp widgets/signalmeter.cpp \
@@ -12,9 +13,11 @@ SOURCES += \
   widgets/FrequencyLineEdit.cpp widgets/FrequencyDeltaLineEdit.cpp \
   widgets/FoxLogWindow.cpp widgets/CabrilloLogWindow.cpp \
   widgets/HelpTextWindow.cpp widgets/RestrictedSpinBox.cpp \
-  widgets/LazyFillComboBox.cpp widgets/CheckableItemComboBox.cpp
+  widgets/LazyFillComboBox.cpp widgets/CheckableItemComboBox.cpp \
+  SignalMonitor.cpp
 
 HEADERS  += \
+  SignalMonitor.hpp \
   widgets/mainwindow.h widgets/plotter.h \
   widgets/about.h widgets/widegraph.h  \
   widgets/displaytext.h widgets/logqso.h widgets/LettersSpinBox.hpp \
@@ -27,7 +30,8 @@ HEADERS  += \
   widgets/FoxLogWindow.hpp widgets/CabrilloLogWindow.hpp \
   widgets/DateTimeEdit.hpp widgets/HelpTextWindow.hpp \
   widgets/RestrictedSpinBox.hpp \
-  widgets/LazyFillComboBox.hpp widgets/CheckableItemComboBox.hpp
+  widgets/LazyFillComboBox.hpp widgets/CheckableItemComboBox.hpp \
+  SignalMonitor.hpp
 
 FORMS    += \
   widgets/mainwindow.ui widgets/about.ui \

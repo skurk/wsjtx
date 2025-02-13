@@ -1,3 +1,17 @@
+This project aims to include a web interface to the xsjt-x client
+for remote operation purposes.
+
+A simple html/js client communicates with WSJT-X through a web socket,
+and signals and slots are added to simulate local activity triggered
+by the remote interface.
+
+The goal is not to implement a 1:1 copy of the WSJT-X interface,
+but to cover enough functionality that remote operation for
+personal usage.
+
+Stian LB5SH
+
+----------------------------------------------------------------------
 
  __       __   ______      _____  ________      __    __ 
 |  \  _  |  \ /      \    |     \|        \    |  \  |  \

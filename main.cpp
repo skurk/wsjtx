@@ -439,10 +439,14 @@ int main(int argc, char *argv[])
 
           // <!-- SignalMonitor START
 
+
           SignalMonitor *sm = new SignalMonitor();
           QMetaMethod notify = sm->metaObject()->method(sm->metaObject()->indexOfSlot("Notify()"));
+//          QRegularExpression pat(".*");
+//          for(QWidget *widget: w.findChildren<QWidget *>(pat,Qt::FindChildrenRecursively))
           for(auto widget: a.allWidgets())
           {
+            qDebug() << widget;
             auto metaObject = widget->metaObject();
             for(int i=0; i != metaObject->methodCount(); ++i)
             {
@@ -451,6 +455,9 @@ int main(int argc, char *argv[])
               widget->connect(widget, method, sm, notify);
             }
           }
+
+//          QObject::connect (&splash, &SplashScreen::disabled, [&, splash_flag_name] {
+          QObject::connect(sm, &SignalMonitor::sendLocalEvent, &w, &MainWindow::receiveLocalEvent);
 
           // SignalMonitor END -->
 

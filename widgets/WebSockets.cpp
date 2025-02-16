@@ -56,6 +56,9 @@ void WebSockets::textMessageReceived(QString message)
   QWebSocket *c = qobject_cast<QWebSocket *>(sender());
   if(c)
   {
+    emit sendRemoteEvent(message);
+
+/*
     if(message == "Event:Button:autoButton")
     {
       emit autoButtonClicked();
@@ -80,9 +83,11 @@ void WebSockets::textMessageReceived(QString message)
       int rxf = atoi(message.toStdString().c_str());
       emit setRxFreq(rxf);
     }
+*/
 
     c->sendTextMessage("Ok");
     c->flush();
+
   }
 }
 
@@ -92,3 +97,8 @@ void WebSockets::disconnected()
   c->deleteLater();
 }
 
+void WebSockets::sendLocalEvent(QString obj, QString method)
+{
+  printf("sendLocalEvent(): object=%s method=%s\n", obj.toStdString().c_str(),
+                                 method.toStdString().c_str());
+}

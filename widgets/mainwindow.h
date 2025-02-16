@@ -117,7 +117,9 @@ public:
 
   int decoderBusy () const {return m_decoderBusy;}
 
+
 public slots:
+  void receiveLocalEvent(QString, QString);
   void showSoundInError(const QString& errorMsg);
   void showSoundOutError(const QString& errorMsg);
   void showStatusMessage(const QString& statusMsg);

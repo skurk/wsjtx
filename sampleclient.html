@@ -79,21 +79,21 @@ ctx.fillRect(0, 0, c.width, c.height);
 c.addEventListener('click', function(e) {
   txFreq = selFreq;
   redrawRxTxBars();
-  socket.send("Event:TxFreq:" + selFreq);
+//  socket.send("Event:TxFreq:" + selFreq);
 
 });
 c.addEventListener('contextmenu', function(e) {
   e.preventDefault();
   rxFreq = selFreq;
   redrawRxTxBars();
-  socket.send("Event:RxFreq:" + selFreq);
+//  socket.send("Event:RxFreq:" + selFreq);
 });
 
 /* socket event handlers */
 
 socket.onopen = () => {
   console.log("socket open");
-  socket.send('Request:Settings');
+//  socket.send('Request:Settings');
 }
 
 socket.onmessage = (message) => {
@@ -194,11 +194,11 @@ document.getElementById("eraseButton").onclick = event =>
   }
 };
 function autoButtonClicked() {
-  socket.send('Event:Button:autoButton');
-  
+//  socket.send('Event:Button:autoButton');
+  socket.send("autoButton:click");
 }
 function haltButtonClicked() {
-  socket.send('Event:Button:haltButton');
+//  socket.send('Event:Button:haltButton');
 }
 function canvasPointerPos(c,e)
 {

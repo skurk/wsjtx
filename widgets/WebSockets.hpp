@@ -21,7 +21,11 @@ class WebSockets : public QObject
     QWebSocketServer *socketServer;
     QWebSocket *current;
     QList<QWebSocket *> clients;
+  public slots:
+    void sendLocalEvent(QString, QString);
   signals:
+    void sendRemoteEvent(QString);
+
     void autoButtonClicked();
     void haltButtonClicked();
     void settingsRequested();

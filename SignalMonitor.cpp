@@ -3,13 +3,23 @@
 #include <QMetaMethod>
 #include <QDebug>
 
+//QMap<QObject*,QString> widgetIndex;
+
+SignalMonitor::SignalMonitor()  {}
+
 void SignalMonitor::Notify()
 {
+/*
   auto i = senderSignalIndex();
   auto sig = sender()->metaObject()->method(i);
-  qDebug() << sender() << sig.methodSignature();
-
-//  printf("%s: %s\n", QString(sender())->toStdString().c_str(),
-//         QString(sig.methodSignature())->toStdString().c_str());
+  QObject *s = sender();
+  QString kuk = s->objectName();
+  QString w = sig.methodSignature();
+  if(!w.contains("destroy"))
+  {
+    printf("SignalMonitor: %d %s %s\n", i, kuk.toStdString().c_str(), w.toStdString().c_str());
+    emit sendLocalEvent(kuk, w);
+  }
+*/
 }
 

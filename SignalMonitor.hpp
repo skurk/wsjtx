@@ -14,6 +14,8 @@ class SignalMonitor: public QObject
 
   public:
     SignalMonitor();
+  signals:
+    void sendLocalEvent(QString, QString);
   public slots:
     void Notify();
 };

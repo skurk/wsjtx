@@ -1058,6 +1058,30 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
 // Connect various buttons to signals emitted by web ui
 
+  connect(ws, &WebSockets::sendRemoteEvent, this, [this](QString message) {
+    printf("Got: %s\n", message.toStdString().c_str());
+    // FUNKER:
+    //QMetaObject::invokeMethod(ui->autoButton, "click", Qt::DirectConnection);
+    QObject *tmpObj = nullptr;
+    QStringList input = message.split(u':');
+    if(input.size() == 2 &&
+       input[1] != nullptr && input[1] != "" &&
+       input[2] != nullptr && input[2] != "")
+    {
+      if(input[0] == "autoButton")
+      {
+        tmpObj = ui->autoButton;
+      }
+      if(tmpObj != nullptr)
+      {
+        QMetaObject::invokeMethod(tmpObj,
+                                  input[1].toStdString().c_str(),
+                                  Qt::DirectConnection);
+      }
+    }
+  });
+
+/*
   connect(ws, &WebSockets::autoButtonClicked, this, [this] {
     ui->autoButton->click();
     QString response = "Event:Button:autoButton:";
@@ -1125,6 +1149,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     QString message = "Settings:TxFreq:" + QString::number(txf);
     ws->writeToClient(message);
   });
+*/
 
 // WebSockets END -->
 
@@ -10321,3 +10346,12 @@ void MainWindow::on_jt65Button_clicked()
     }
     on_actionJT65_triggered();
 }
+
+void MainWindow::receiveLocalEvent(QString obj, QString method)
+{
+  if(obj != "")
+  {
+    printf("receieLocalEvent(): obj=%s method=%s\n", obj.toStdString().c_str(), method.toStdString().c_str());
+  }
+}
+

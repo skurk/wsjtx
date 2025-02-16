@@ -1062,16 +1062,23 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     printf("Got: %s\n", message.toStdString().c_str());
     // FUNKER:
     //QMetaObject::invokeMethod(ui->autoButton, "click", Qt::DirectConnection);
-    QObject *tmpObj = nullptr;
     QStringList input = message.split(u':');
     if(input.size() == 2 &&
-       input[1] != nullptr && input[1] != "" &&
-       input[2] != nullptr && input[2] != "")
+       input[0] != nullptr && input[0] != "" &&
+       input[1] != nullptr && input[1] != "")
     {
+      QObject *tmpObj = this->centralWidget()->findChild<QObject*>(input[0]);
+      
+/*
       if(input[0] == "autoButton")
       {
         tmpObj = ui->autoButton;
       }
+      else if(input[0] == "stopButton")
+      {
+        tmpObj = ui->stopButton;
+      }
+*/
       if(tmpObj != nullptr)
       {
         QMetaObject::invokeMethod(tmpObj,

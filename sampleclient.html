@@ -193,12 +193,14 @@ document.getElementById("eraseButton").onclick = event =>
     document.getElementById("rb").value="";
   }
 };
+function stopButtonClicked() {
+  socket.send("stopButton:click");
+}
 function autoButtonClicked() {
-//  socket.send('Event:Button:autoButton');
   socket.send("autoButton:click");
 }
 function haltButtonClicked() {
-//  socket.send('Event:Button:haltButton');
+  socket.send("stopTxButton:click");
 }
 function canvasPointerPos(c,e)
 {

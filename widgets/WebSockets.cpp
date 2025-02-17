@@ -18,6 +18,11 @@ WebSockets::WebSockets(quint16 port, QObject *parent) :
 
 WebSockets::~WebSockets()
 {
+  closeServer();
+}
+
+void WebSockets::closeServer()
+{
   socketServer->close();
 }
 
@@ -29,8 +34,9 @@ void WebSockets::onNewConnection()
           this, &WebSockets::textMessageReceived);
   connect(conn, &QWebSocket::disconnected,
           this, &WebSockets::disconnected);
-
   clients << conn;
+
+  writeToClient(QString("Event:monitorButton:") + QString((m_monitoring?"true":"false")));
 }
 
 void WebSockets::writeToClient(QString message)
@@ -95,6 +101,14 @@ void WebSockets::disconnected()
 {
   QWebSocket *c = qobject_cast<QWebSocket *>(sender());
   c->deleteLater();
+}
+
+void WebSockets::closeAllConnections()
+{
+  foreach(QWebSocket *w, clients)
+  {
+    QMetaObject::invokeMethod(w, "close", Qt::DirectConnection);
+  }
 }
 
 void WebSockets::sendLocalEvent(QString obj, QString method)

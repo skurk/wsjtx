@@ -1056,107 +1056,60 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
   ws = new WebSockets(14444);
 
-// Connect various buttons to signals emitted by web ui
+// Find widget event matching the client request
 
   connect(ws, &WebSockets::sendRemoteEvent, this, [this](QString message) {
-    printf("Got: %s\n", message.toStdString().c_str());
-    // FUNKER:
-    //QMetaObject::invokeMethod(ui->autoButton, "click", Qt::DirectConnection);
-    QStringList input = message.split(u':');
-    if(input.size() == 2 &&
-       input[0] != nullptr && input[0] != "" &&
-       input[1] != nullptr && input[1] != "")
+    if(message.startsWith("Event:"))
     {
-      QObject *tmpObj = this->centralWidget()->findChild<QObject*>(input[0]);
-      
+      message = message.remove(QRegExp("^Event:"));
+      printf("Event received: %s\n", message.toStdString().c_str());
+      QStringList input = message.split(u':');
+      if(input.size() == 2 &&
+         input[0] != nullptr && input[0] != "" &&
+         input[1] != nullptr && input[1] != "")
+      {
+        QObject *targetObj = this->centralWidget()->findChild<QObject*>(input[0]);
+        if(targetObj != nullptr)
+        {
+          QMetaObject::invokeMethod(targetObj,
+                                    input[1].toStdString().c_str(),
+                                    Qt::DirectConnection);
+        }
+      }
+    }
+  });
+
+// We need to monitor some specific signals, too.
+
+  connect(this, &MainWindow::resumeAudioInputStream, this, [this] {
+    ws->writeToClient("Event:monitorButton:true");
+    ws->m_monitoring = true;
+  });
+
+  connect(this, &MainWindow::suspendAudioInputStream, this, [this] {
+    ws->writeToClient("Event:monitorButton:false");
+    ws->m_monitoring = false;
+  });
+
+  connect (ui->autoButton, &QPushButton::clicked, this, [this] {
+    ws->writeToClient(QString("Event:autoButton:")+QString(m_auto?"true":"false"));
+  });
+
+
 /*
-      if(input[0] == "autoButton")
-      {
-        tmpObj = ui->autoButton;
-      }
-      else if(input[0] == "stopButton")
-      {
-        tmpObj = ui->stopButton;
-      }
-*/
-      if(tmpObj != nullptr)
-      {
-        QMetaObject::invokeMethod(tmpObj,
-                                  input[1].toStdString().c_str(),
-                                  Qt::DirectConnection);
-      }
-    }
-  });
-
-/*
-  connect(ws, &WebSockets::autoButtonClicked, this, [this] {
-    ui->autoButton->click();
-    QString response = "Event:Button:autoButton:";
-    response += (m_auto?"disabled":"enabled");
-    ws->writeToClient(response);
-  });
-
-  connect(ws, &WebSockets::haltButtonClicked, this, [this] {
-    ui->stopTxButton->click();
-
-    QString response = "Event:Button:autoButton:";
-    response += (m_auto?"disabled":"enabled");
-    ws->writeToClient(response);
-  });
-
-  connect(ws, &WebSockets::settingsRequested, this, [this] {
-    // Current callsign
-    QString response = "Settings:CallSign:LB5SH";
-    ws->writeToClient(response);
-
-    // Waterfall palette
-    response = "Settings:Palette:";
-    for(int i=0; i<g_ColorTbl.size(); i++)
+  connect (ui->actionExit, &QAction::triggered, this, [this] {
+    if(ws)
     {
-      response += g_ColorTbl[i].name();
-      response += ",";
+      ws->closeAllConnections();
+      ws->closeServer();
     }
-    ws->writeToClient(response);
-
-    // RX and TX freq
-    response = "Settings:RxFreq:" + QString::number(ui->RxFreqSpinBox->value());
-    ws->writeToClient(response);
-
-    response = "Settings:TxFreq:" + QString::number(ui->TxFreqSpinBox->value());
-    ws->writeToClient(response);
-
-  });
-
-  connect(ws, &WebSockets::setTxFreq, this, [this](int txf) {
-    m_wideGraph->setTxFreq((txf*3) + 50);
-  });
-
-  connect(ws, &WebSockets::setRxFreq, this, [this](int rxf) {
-    m_wideGraph->setRxFreq((rxf*3) + 50);
-  });
-
-  connect(m_wideGraph.data(), &WideGraph::waterfallUpdated, this, [this] {
-    QString response = "WaterFall:";
-
-    for(int i=0; i<g_WaterFall.size(); i++)
-    {
-      response += QString::number(g_WaterFall[i],16);
-      response += ",";
-    }
-    ws->writeToClient(response);
-  });
-
-
-  connect(m_wideGraph.data(), &WideGraph::tellRxFreq, this, [this](int rxf) {
-    QString message = "Settings:RxFreq:" + QString::number(rxf);
-    ws->writeToClient(message);
-  });
-
-  connect(m_wideGraph.data(), &WideGraph::tellTxFreq, this, [this](int txf) {
-    QString message = "Settings:TxFreq:" + QString::number(txf);
-    ws->writeToClient(message);
   });
 */
+
+
+// Prepare initial values to clients
+
+  ws->m_monitoring = m_monitoring;
 
 // WebSockets END -->
 
@@ -1223,6 +1176,14 @@ void MainWindow::on_the_minute ()
 //--------------------------------------------------- MainWindow destructor
 MainWindow::~MainWindow()
 {
+  if(ws)
+  {
+    ws->closeAllConnections();
+    ws->closeServer();
+    delete ws;
+    ws = NULL;
+  }
+
   if(m_astroWidget) m_astroWidget.reset ();
   auto fname {QDir::toNativeSeparators(m_config.writeable_data_dir ().absoluteFilePath ("wsjtx_wisdom.dat"))};
   fftwf_export_wisdom_to_filename (fname.toLocal8Bit ());
@@ -2738,6 +2699,7 @@ void MainWindow::closeEvent(QCloseEvent * e)
   mem_jt9->detach();
   Q_EMIT finished ();
   QMainWindow::closeEvent (e);
+  printf("...?\n");
 }
 
 void MainWindow::on_stopButton_clicked()                       //stopButton

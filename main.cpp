@@ -456,12 +456,10 @@ int main(int argc, char *argv[])
             }
           }
 
-//          QObject::connect (&splash, &SplashScreen::disabled, [&, splash_flag_name] {
           QObject::connect(sm, &SignalMonitor::sendLocalEvent, &w, &MainWindow::receiveLocalEvent);
 
+
           // SignalMonitor END -->
-
-
 
           QObject::connect (&a, SIGNAL (lastWindowClosed()), &a, SLOT (quit()));
           result = a.exec();

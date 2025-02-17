@@ -44,10 +44,11 @@ CQ LB1DK
 <br />
 
 <div>
-  <input id="stopButton" type="button" value="Stop" onClick="stopButtonClicked()">
-  <input id="eraseButton" type="button" value="Erase" onClick="eraseButtonClicked()">
-  <input id="autoButton" type="button" value="Enable Tx" onClick="autoButtonClicked()">
-  <input id="haltTxButton" type="button" value="Halt Tx" onClick="haltButtonClicked()">
+  <input id="stopButton" type="button" value="Stop" onClick="socket.send('Event:stopButton:click')">
+  <input id="monitorButton" type="button" value="Monitor" onClick="socket.send('Event:monitorButton:click')">
+  <input id="eraseButton" type="button" value="Erase" onClick="socket.send('Event:eraseButton:click')">
+  <input id="autoButton" type="button" value="Enable Tx" onClick="socket.send('Event:autoButton:click')">
+  <input id="haltTxButton" type="button" value="Halt Tx" onClick="socket.send('Event:stopTxButton:click')">
   <input id="callSign" type="text" value="">
 </div>
 
@@ -96,9 +97,18 @@ socket.onopen = () => {
 //  socket.send('Request:Settings');
 }
 
-socket.onmessage = (message) => {
+socket.onclose = function(e)
+{
+  console.log("Server connection lost");
+}
+
+socket.onmessage = (message) =>
+{
   var content = message.data.toString();
-  //console.log("Received: " + content);
+  if(!content.startsWith("WaterFall:"))
+  {
+    console.log("Received: " + content);
+  }
 
   if(content.startsWith("WaterFall:"))
   {
@@ -113,6 +123,20 @@ socket.onmessage = (message) => {
       var ii = (Number("0x"+pixels[i]));
       ctx.fillStyle=palette[ii];
       ctx.fillRect(i, 0, 1, 1);
+    }
+  }
+  else if(content.startsWith("Event:"))
+  {
+    content = content.replace(/^Event:/, "");
+    if(content.startsWith("monitorButton:"))
+    {
+      content = content.replace(/^monitorButton:/, "");
+      document.getElementById("monitorButton").style.background = (content === 'true' ? "#00ff00":"");
+    }
+    else if(content.startsWith("autoButton:"))
+    {
+      content = content.replace(/^autoButton:/, "");
+      document.getElementById("autoButton").style.background = (content === 'true' ? "#ff0000":"");
     }
   }
   else if(content.startsWith("Settings:"))
@@ -180,7 +204,10 @@ socket.onmessage = (message) => {
   }
 }
 
-// Discriminate "Erase" button, single or double click 
+//
+// Special treatment for "Erase" button, single or double click?
+//
+
 document.getElementById("eraseButton").onclick = event =>
 {
   if(event.detail === 1)
@@ -193,21 +220,22 @@ document.getElementById("eraseButton").onclick = event =>
     document.getElementById("rb").value="";
   }
 };
-function stopButtonClicked() {
-  socket.send("stopButton:click");
-}
-function autoButtonClicked() {
-  socket.send("autoButton:click");
-}
-function haltButtonClicked() {
-  socket.send("stopTxButton:click");
-}
+
+//
+// Record mouse position in canvas in case of lmb/rmb click
+//
+
 function canvasPointerPos(c,e)
 {
   var rect = c.getBoundingClientRect();
   var xpos = (e.clientX - rect.left);
   selFreq = xpos;
 }
+
+//
+// Draw red/green bars for RX/TX QRG indicators
+//
+
 function redrawRxTxBars()
 {
   ctxrx.fillStyle="#c8c8c8";
@@ -224,6 +252,10 @@ function redrawRxTxBars()
   ctxrx.fillRect(rxFreq+23, 8,  2, 4);
 
 }
+
+//
+// Detect double-click in textarea (work in progress!)
+//
 
 function dblClickEvt(obj) {
   let pos = obj.selectionStart;

@@ -93,6 +93,7 @@
 #include "Logger.hpp"
 
 #include "WebSockets.hpp"
+#include "../SignalMonitor.hpp"
 
 #define FCL fortran_charlen_t
 
@@ -1056,6 +1057,14 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
   ws = new WebSockets(14444);
 
+  QStringList keys = m_settings->allKeys();
+  foreach(const QString &key, keys)
+  {
+    QString value = QString(m_settings->value(key).toString());
+    ws->wsjtx_settings.insert(key,value);
+//    printf("Key=%s, value=%s\n", key.toStdString().c_str(), value.toStdString().c_str());
+  }
+
 // Find widget event matching the client request
 
   connect(ws, &WebSockets::sendRemoteEvent, this, [this](QString message) {
@@ -1081,6 +1090,19 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
 // We need to monitor some specific signals, too.
 
+  connect(m_wideGraph.data(), &WideGraph::waterfallUpdated, this, [this] {
+    QString response = "WaterFall:";
+
+    for(int i=0; i<g_WaterFall.size(); i++)
+    {
+      response += QString::number(g_WaterFall[i],16);
+      response += ",";
+    }
+    ws->writeToClient(response);
+  });
+
+/*
+
   connect(this, &MainWindow::resumeAudioInputStream, this, [this] {
     ws->writeToClient("Event:monitorButton:true");
     ws->m_monitoring = true;
@@ -1095,8 +1117,8 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     ws->writeToClient(QString("Event:autoButton:")+QString(m_auto?"true":"false"));
   });
 
+*/
 
-/*
   connect (ui->actionExit, &QAction::triggered, this, [this] {
     if(ws)
     {
@@ -1104,14 +1126,29 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
       ws->closeServer();
     }
   });
-*/
-
-
-// Prepare initial values to clients
-
-  ws->m_monitoring = m_monitoring;
 
 // WebSockets END -->
+
+// <!-- SignalMonitor START 
+
+  SignalMonitor *sm = new SignalMonitor();
+  QMetaMethod notify = sm->metaObject()->method(sm->metaObject()->indexOfSlot("Notify()"));
+  QRegularExpression pat("^(.*)$");
+  for(QWidget *widget: this->findChildren<QWidget *>(pat,Qt::FindChildrenRecursively))
+  {
+    qDebug() << widget;
+    auto metaObject = widget->metaObject();
+    for(int i=0; i != metaObject->methodCount(); ++i)
+    {
+      auto method = metaObject->method(i);
+      if(method.methodType() != QMetaMethod::Signal) continue;
+      widget->connect(widget, method, sm, notify);
+    }
+  }
+
+  QObject::connect(sm, &SignalMonitor::sendLocalEvent, this, &MainWindow::receiveLocalEvent);
+
+// SignalMonitor END -->
 
 // this must be the last statement of constructor
   if (!m_valid) throw std::runtime_error {"Fatal initialization exception"};
@@ -10318,9 +10355,10 @@ void MainWindow::on_jt65Button_clicked()
 
 void MainWindow::receiveLocalEvent(QString obj, QString method)
 {
+  QString message = QString("Event:" + obj + ":" + method);
   if(obj != "")
   {
-    printf("receieLocalEvent(): obj=%s method=%s\n", obj.toStdString().c_str(), method.toStdString().c_str());
+    ws->writeToClient(message);
   }
 }
 

@@ -439,7 +439,7 @@ int main(int argc, char *argv[])
 
           // <!-- SignalMonitor START
 
-
+/*
           SignalMonitor *sm = new SignalMonitor();
           QMetaMethod notify = sm->metaObject()->method(sm->metaObject()->indexOfSlot("Notify()"));
 //          QRegularExpression pat(".*");
@@ -457,6 +457,8 @@ int main(int argc, char *argv[])
           }
 
           QObject::connect(sm, &SignalMonitor::sendLocalEvent, &w, &MainWindow::receiveLocalEvent);
+
+*/
 
 
           // SignalMonitor END -->

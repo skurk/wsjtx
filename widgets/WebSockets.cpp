@@ -1,6 +1,11 @@
 #include <QWebSocketServer>
 #include <QWebSocket>
+#include <QColor>
+#include <QVector>
 #include "WebSockets.hpp"
+
+extern QVector<QColor> g_ColorTbl;
+
 
 WebSockets::WebSockets(quint16 port, QObject *parent) :
            QObject(parent),
@@ -36,14 +41,34 @@ void WebSockets::onNewConnection()
           this, &WebSockets::disconnected);
   clients << conn;
 
-  writeToClient(QString("Event:monitorButton:") + QString((m_monitoring?"true":"false")));
+  // Init connection by dumping settings to client
+
+  for(auto i=wsjtx_settings.cbegin(), end=wsjtx_settings.cend(); i != end; ++i)
+  {
+    QString message = QString("Settings:"+i.key()+":"+i.value());
+    writeToClient(message);
+    printf("%s\n", message.toStdString().c_str());
+  }
+
+  // Palette for waterfall
+
+  QString response = "Palette:";
+  for(int i=0; i<g_ColorTbl.size(); i++)
+  {
+    response += g_ColorTbl[i].name();
+    response += ",";
+  }
+  writeToClient(response);
+
+  // Tell client to boot
+
+  writeToClient("Boot");
 }
 
 void WebSockets::writeToClient(QString message)
 {
   foreach(QWebSocket *c,  clients)
   {
-//    QWebSocket *c = qobject_cast<QWebSocket *>(sender());
     if(c)
     {
       c->sendTextMessage(message);
@@ -63,43 +88,13 @@ void WebSockets::textMessageReceived(QString message)
   if(c)
   {
     emit sendRemoteEvent(message);
-
-/*
-    if(message == "Event:Button:autoButton")
-    {
-      emit autoButtonClicked();
-    }
-    else if(message == "Event:Button:haltButton")
-    {
-      emit haltButtonClicked();
-    }
-    else if(message == "Request:Settings")
-    {
-      emit settingsRequested();
-    }
-    else if(message.startsWith("Event:TxFreq:"))
-    {
-      message.replace("Event:TxFreq:", "");
-      int txf = atoi(message.toStdString().c_str());
-      emit setTxFreq(txf);
-    }
-    else if(message.startsWith("Event:RxFreq:"))
-    {
-      message.replace("Event:RxFreq:", "");
-      int rxf = atoi(message.toStdString().c_str());
-      emit setRxFreq(rxf);
-    }
-*/
-
-    c->sendTextMessage("Ok");
-    c->flush();
-
   }
 }
 
 void WebSockets::disconnected()
 {
   QWebSocket *c = qobject_cast<QWebSocket *>(sender());
+  QMetaObject::invokeMethod(c, "close", Qt::DirectConnection);
   c->deleteLater();
 }
 
@@ -111,8 +106,5 @@ void WebSockets::closeAllConnections()
   }
 }
 
-void WebSockets::sendLocalEvent(QString obj, QString method)
-{
-  printf("sendLocalEvent(): object=%s method=%s\n", obj.toStdString().c_str(),
-                                 method.toStdString().c_str());
-}
+void WebSockets::sendLocalEvent(QString, QString) {}
+

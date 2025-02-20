@@ -1,9 +1,7 @@
-#include "SignalMonitor.hpp"
-
 #include <QMetaMethod>
 #include <QDebug>
 
-//QMap<QObject*,QString> widgetIndex;
+#include "SignalMonitor.hpp"
 
 SignalMonitor::SignalMonitor()  {}
 
@@ -13,13 +11,13 @@ void SignalMonitor::Notify()
   auto i = senderSignalIndex();
   auto sig = sender()->metaObject()->method(i);
   QObject *s = sender();
-  QString kuk = s->objectName();
-  QString w = sig.methodSignature();
-  if(!w.contains("destroy") && !w.contains("water"))
-  {
-    printf("SignalMonitor: %d %s %s\n", i, kuk.toStdString().c_str(), w.toStdString().c_str());
-    emit sendLocalEvent(kuk, w);
-  }
+  QString objName = s->objectName();
+  QString methodSig = sig.methodSignature();
 
+  // default ignore null objects and destroy signals to reduce overhead
+  if(!objName.isEmpty() && !methodSig.contains("destroy"))
+  {
+    emit sendLocalEvent(objName, methodSig);
+  }
 }
 

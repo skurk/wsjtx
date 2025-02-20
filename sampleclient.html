@@ -52,17 +52,25 @@ CQ LB1DK
   <input id="callSign" type="text" value="">
 </div>
 
+<div>
+  <input id="ft4Button" type="button" value="FT4" onClick="socket.send('Event:ft4Button:click')">
+  <input id="ft8Button" type="button" value="FT8" onClick="socket.send('Event:ft8Button:click')">
+</div>
+
 <br />
 
 </div>
 
 <script>
 
-let socket=new WebSocket("ws://localhost:14444");
 const palette = [];
-var selFreq;
-var txFreq;
-var rxFreq;
+
+let socket=new WebSocket("ws://localhost:14444");
+
+var wsjtx_settings = new Map();
+
+var m_autoButton = false;
+var m_selFreq;
 
 // Initialize rxtx bar
 var crxtx = document.getElementById("rxtx");
@@ -78,23 +86,22 @@ ctx.fillStyle="#000000";
 ctx.fillRect(0, 0, c.width, c.height);
 
 c.addEventListener('click', function(e) {
-  txFreq = selFreq;
+  wsjtx_settings.set("Common/RxFreq",(m_selFreq*3).toString());
+  socket.send("Event:RxFreq:" + m_selFreq);
   redrawRxTxBars();
-//  socket.send("Event:TxFreq:" + selFreq);
-
 });
+
 c.addEventListener('contextmenu', function(e) {
   e.preventDefault();
-  rxFreq = selFreq;
+  wsjtx_settings.set("Common/TxFreq",(m_selFreq*3).toString());
+  socket.send("Event:RxFreq:" + m_selFreq);
   redrawRxTxBars();
-//  socket.send("Event:RxFreq:" + selFreq);
 });
 
 /* socket event handlers */
 
 socket.onopen = () => {
   console.log("socket open");
-//  socket.send('Request:Settings');
 }
 
 socket.onclose = function(e)
@@ -105,131 +112,99 @@ socket.onclose = function(e)
 socket.onmessage = (message) =>
 {
   var content = message.data.toString();
-  if(!content.startsWith("WaterFall:"))
+  var items=content.split(':');
+  var cmd = items[0] ?? "";
+
+  if(cmd == "Boot")
   {
-    console.log("Received: " + content);
+    console.log("Boot command received");
+    initAllSettings();
   }
 
-  if(content.startsWith("WaterFall:"))
+  if(items.length == 2)
   {
-    content = content.replace(/^WaterFall:/, "");
-
-    var img = ctx.getImageData(0,0,2048,127);
-    ctx.putImageData(img, 0, 1);
-
-    var pixels=content.split(',');
-    for(i=0; i<pixels.length; i++)
+    if(cmd == "WaterFall")
     {
-      var ii = (Number("0x"+pixels[i]));
-      ctx.fillStyle=palette[ii];
-      ctx.fillRect(i, 0, 1, 1);
+      var img = ctx.getImageData(0,0,c.width,c.height-1);
+      ctx.putImageData(img, 0, 1);
+  
+      var pixels=items[1].split(',');
+  
+      for(i=0; i<pixels.length; i++)
+      {
+        var ii = (Number("0x"+pixels[i]));
+        ctx.fillStyle=palette[ii];
+        ctx.fillRect(i, 0, 1, 1);
+      }
     }
-  }
-  else if(content.startsWith("Event:"))
-  {
-    content = content.replace(/^Event:/, "");
-    if(content.startsWith("monitorButton:"))
+    else if(cmd == "Palette")
     {
-      content = content.replace(/^monitorButton:/, "");
-      document.getElementById("monitorButton").style.background = (content === 'true' ? "#00ff00":"");
-    }
-    else if(content.startsWith("autoButton:"))
-    {
-      content = content.replace(/^autoButton:/, "");
-      document.getElementById("autoButton").style.background = (content === 'true' ? "#ff0000":"");
-    }
-  }
-  else if(content.startsWith("Settings:"))
-  {
-    content = content.replace(/^Settings:/, "");
-
-    if(content.startsWith("RxFreq:"))
-    {
-      console.log("Received RxFreq");
-      content = content.replace(/^RxFreq:/, "");
-      rxFreq = (parseInt(content)/3)-25;
-      redrawRxTxBars();
-    }
-    else if(content.startsWith("TxFreq:"))
-    {
-      console.log("Received TxFreq");
-      content = content.replace(/^TxFreq:/, "");
-      txFreq = (parseInt(content)/3)-25;
-      redrawRxTxBars();
-    }
-    else if(content.startsWith("Palette:"))
-    {
-      content = content.replace(/^Palette:/, "");
-      const cols = content.split(',');
+      const cols = items[1].split(',');
       for(var i=0; i<(cols.length-1); i++)
       {
         palette.push(cols[i]);
       }
-      console.log("Waterfall palette of " + (cols.length-1) + " entries received");
-    }
-    else if(content.startsWith("CallSign:"))
-    {
-      content = content.replace(/^CallSign:/, "");
-      console.log("Received current callsign: " + content);
-      document.getElementById("callSign").value = content;
     }
   }
-  else if(content.startsWith("Event:"))
+
+  if(items.length != 3) return;
+
+  if(cmd == "Event")
   {
-    console.log("Event received");
-    content = content.replace(/^Event:/, "");
-    if(content.startsWith("Button:"))
+    console.log("Received event: " + content);
+    var obj = items[1];
+    var method = items[2];
+    if(method == "pressed()")
     {
-      console.log("Button press received");
-      content = content.replace(/^Button:/, "");
-      if(content.startsWith("autoButton:"))
+      switch(obj)
       {
-        content = content.replace(/^autoButton:/, "");
-        if(content == "enabled")
-        {
-          document.getElementById("autoButton").style.background = "";
-        }
-        else
-        {
-          document.getElementById("autoButton").style.background = "#ff0000";
-        }
+        case "autoButton":     clickAutoButton();       break;
+        case "monitorButton":  clickMonitorButton();    break;
       }
-      else
-      {
-        console.log("Unknown button: " + content);
-      }
-    } else {
-      console.log("Unknown event: " + content);
     }
+  }
+  else if(cmd == "Settings")
+  {
+    var key = items[1];
+    var value = items[2];
+    wsjtx_settings.set(key,value);
   }
 }
 
-//
-// Special treatment for "Erase" button, single or double click?
-//
+/*****************************************************/
 
-document.getElementById("eraseButton").onclick = event =>
+function initAllSettings()
 {
-  if(event.detail === 1)
-  {
-    document.getElementById("lb").value="";
-  }
-  else if(event.detail === 2)
-  {
-    document.getElementById("lb").value="";
-    document.getElementById("rb").value="";
-  }
-};
+  clickMonitorButton(false);
+  redrawRxTxBars();
 
-//
-// Record mouse position in canvas in case of lmb/rmb click
-//
+  // Common/TxFreq 
+}
+
+/*****************************************************/
+
+function clickMonitorButton(toggle=true)
+{
+  var value = (wsjtx_settings.get("Configuration/MonitorOFF")==='true');
+  if(toggle)
+  {
+    value = value ? false:true;
+    wsjtx_settings.set("Configuration/MonitorOFF", value.toString());
+  }
+  document.getElementById("monitorButton").style.background = value ? "":"#00ff00";
+}
+
+function clickAutoButton()
+{
+  m_autoButton = !m_autoButton;
+  document.getElementById("autoButton").style.background = (m_autoButton == true ? "#ff0000":"");
+}
 
 function canvasPointerPos(c,e)
 {
   var rect = c.getBoundingClientRect();
   var xpos = (e.clientX - rect.left);
-  selFreq = xpos;
+  m_selFreq = xpos;
 }
 
 //
@@ -238,6 +213,11 @@ function canvasPointerPos(c,e)
 
 function redrawRxTxBars()
 {
+  var rxFreq = parseInt(wsjtx_settings.get("Common/RxFreq"))/3;
+  var txFreq = parseInt(wsjtx_settings.get("Common/TxFreq"))/3;
+
+  console.log("redrawRxTxBars: rx=" + rxFreq + ", tx=" + txFreq);
+
   ctxrx.fillStyle="#c8c8c8";
   ctxrx.fillRect(0, 0, crxtx.width, crxtx.height);
 
@@ -251,35 +231,6 @@ function redrawRxTxBars()
   ctxrx.fillRect(rxFreq,    8,  2, 4);
   ctxrx.fillRect(rxFreq+23, 8,  2, 4);
 
-}
-
-//
-// Detect double-click in textarea (work in progress!)
-//
-
-function dblClickEvt(obj) {
-  let pos = obj.selectionStart;
-  let text = obj.value;
-
-  let lineStart = text.lastIndexOf("\n", pos);
-  let lineEnd = text.indexOf("\n", pos);
-
-  let before = ( lineStart === -1 ? '' : text.slice(0, lineStart + 1) ); // row(s) before incl. line break
-  let after = '';
-
-  if(lineEnd === -1) // -> last row is selected
-    lineEnd = undefined; // because -1 would cause the selection to strip the last character
-  else
-    after = text.slice(lineEnd); // row(s) after the selection
-
-  let selected = text.slice(lineStart + 1, lineEnd); // the selected row
-
-  // write new value (manipulate before, selection a/o after if you want)
-  obj.value = before + '-' + selected + '-' + after;
-
-  // reset cursor position:
-  obj.selectionStart = pos;
-  obj.selectionEnd = pos;
 }
 
 </script>

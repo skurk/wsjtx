@@ -3,6 +3,7 @@
 
 #include <QWebSocketServer>
 #include <QWebSocket>
+#include <QMap>
 
 namespace Ui {
   class WebSockets;
@@ -19,17 +20,15 @@ class WebSockets : public QObject
     void closeServer();
     void closeAllConnections();
     void writeToClient(QString message);
-    bool m_monitoring;
+    QMap<QString,QString> wsjtx_settings;
   private:
     QWebSocketServer *socketServer;
     QWebSocket *current;
     QList<QWebSocket *> clients;
-
   public slots:
     void sendLocalEvent(QString, QString);
   signals:
     void sendRemoteEvent(QString);
-
     void autoButtonClicked();
     void haltButtonClicked();
     void settingsRequested();

@@ -2,6 +2,84 @@
 <style>
 body {
   width: 1024px;
+  font-family: arial;
+  font-size: 14px;
+}
+input {
+  font-family: arial;
+  font-size: 14px;
+}
+input.dxText {
+  margin-top: 10px;
+  height: 30px;
+  width: 80px;
+}
+input.narrowButton {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  width: 50px;
+}
+input.button {
+  width: 95px;
+}
+div.panel {
+  margin-left: 10px;
+  display: flex;
+}
+div.menuRow {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+div.buttonRow {
+  width: 64px;
+}
+div.dbMeter {
+  width: 64px;
+  border: 1px #aaaaaa solid;
+  margin-right: 10px;
+}
+div.menuColumn {
+  width: 200px;
+  background: #cccccc;
+}
+div.dxBlock {
+  width: 100%;
+  display: flex;
+  height: 50px;
+  text-align: center;
+}
+dxBlock.input {
+}
+span.label {
+  margin-right: 20px;
+}
+span.darkDisplay {
+  display: block;
+  width: 100%;
+  background: #000000;
+  color: #ffff00;
+  font-size: 20px;
+  text-align: center;
+  padding-bottom: 8px;
+  padding-top: 8px;
+  margin-bottom: 14px;
+}
+span.dxDisplay {
+  background: #aabbee;
+  color: #000000;
+  font-size: 16px;
+  text-align: center;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+div.dxTextBlock {
+  display: inline-block;
+  width: 30%;
+  margin-top: 4px;
+  padding: 8px 8px 8px 8px;
 }
 textarea {
   resize: none;
@@ -13,9 +91,9 @@ textarea {
   overflow: auto;
 }
 .main {
-  padding-top: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
+/*  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px; */
   width: 100%;
   background: #d8d8d8;
 }
@@ -43,19 +121,79 @@ CQ LB1DK
 
 <br />
 
-<div>
-  <input id="stopButton" type="button" value="Stop" onClick="socket.send('Event:stopButton:click')">
-  <input id="monitorButton" type="button" value="Monitor" onClick="socket.send('Event:monitorButton:click')">
-  <input id="eraseButton" type="button" value="Erase" onClick="socket.send('Event:eraseButton:click')">
-  <input id="autoButton" type="button" value="Enable Tx" onClick="socket.send('Event:autoButton:click')">
-  <input id="haltTxButton" type="button" value="Halt Tx" onClick="socket.send('Event:stopTxButton:click')">
-  <input id="callSign" type="text" value="">
+<div class="menuRow">
+  <input id="cbCqOnly" type="checkbox">
+  <span class="label" onClick="javascript:getElementById('cbCqOnly').click()">CQ Only</span>
+  <input disabled class="button" id="logButton" type="button" value="Log QSO" onClick="#">
+  <input class="button" id="stopButton" type="button" value="Stop" onClick="socket.send('Event:stopButton:click')">
+  <input class="button" id="monitorButton" type="button" value="Monitor" onClick="socket.send('Event:monitorButton:click')">
+  <input class="button" id="eraseButton" type="button" value="Erase" onClick="socket.send('Event:eraseButton:click')">
+  <input class="button" id="autoButton" type="button" value="Enable Tx" onClick="socket.send('Event:autoButton:click')">
+  <input class="button" id="haltTxButton" type="button" value="Halt Tx" onClick="socket.send('Event:stopTxButton:click')">
+  <input class="button" id="tuneButton" type="button" value="Tune" onClick="socket.send('Event:tuneButton:click')">
 </div>
 
-<div>
-  <input id="ft4Button" type="button" value="FT4" onClick="socket.send('Event:ft4Button:click')">
-  <input id="ft8Button" type="button" value="FT8" onClick="socket.send('Event:ft8Button:click')">
+<div class="panel">
+
+  <div class="dbMeter">
+  </div>
+
+  <div class="buttonRow">
+    <input class="narrowButton" id="houndButton" type="button" value="H" onClick="socket.send('Event:houndButton:click')">
+    <input class="narrowButton" id="ft4Button" type="button" value="FT4" onClick="socket.send('Event:ft4Button:click')">
+    <input class="narrowButton" id="ft8Button" type="button" value="FT8" onClick="socket.send('Event:ft8Button:click')">
+    <input class="narrowButton" id="mskButton" type="button" value="MSK" onClick="socket.send('Event:mskButton:click')">
+    <input class="narrowButton" id="q65Button" type="button" value="Q65" onClick="socket.send('Event:q65Button:click')">
+    <input class="narrowButton" id="jt65Button" type="button" value="JT65" onClick="socket.send('Event:jt65Button:click')">
+  </div>
+  <div class="menuColumn">
+    <div>
+      <span class="darkDisplay">14.074 000</span>
+    </div>
+    <div class="dxBlock">
+      <div style="width: 50%;">
+        <span class="dxDisplay">DX Call</span>
+        <input class="dxText" type="text" id="dxCall">
+      </div>
+      <div style="width: 50%;">
+        <span class="dxDisplay">DX Grid</span>
+        <input class="dxText" type="text" id="dxGrid">
+      </div>
+    </div>
+    <div class="dxBlock">
+      <div class="dxTextBlock" style="float:left;">
+      </div>
+      <div class="dxTextBlock" style="float:right;">
+      </div>
+    </div>
+
+    <div class="dxBlock" style="justify-content: space-between;">
+      <div>
+        <input class="button" type="button" name="dxlookup" value="Lookup">
+      </div>
+      <div>
+        <input class="button" type="button" name="dxadd" value="Add">
+      </div>
+    </div>
+
+    <div>
+      <span class="darkDisplay">2025 Feb 20<br />11:40:39</span>
+    </div>
+  </div>
+  <div class="menuColumn">
+    <input id="selPeriod" type="checkbox">
+    <span class="label" onClick="javascript:getElementById('selPeriod').click()">Tx even/1st</span>
+  </div>
 </div>
+
+<!--
+<div class="menuRow">
+</div>
+
+<div class="menuRow">
+  <input id="callSign" type="text" value="">
+</div>
+-->
 
 <br />
 
@@ -63,34 +201,105 @@ CQ LB1DK
 
 <script>
 
-const palette = [];
+/*****************************************************
+   Support functions
+ ****************************************************/
+
+function clickMonitorButton(toggle=true)
+{
+  var value = (wsjtx_settings.get("Configuration/MonitorOFF")==='true');
+  if(toggle)
+  {
+    value = value ? false:true;
+    wsjtx_settings.set("Configuration/MonitorOFF", value.toString());
+  }
+  document.getElementById("monitorButton").style.background = value ? "":"#00ff00";
+}
+
+function clickAutoButton()
+{
+  m_autoButton = !m_autoButton;
+  document.getElementById("autoButton").style.background = (m_autoButton == true ? "#ff0000":"");
+}
+
+function clickTuneButton()
+{
+  m_tuneButton = !m_tuneButton;
+  document.getElementById("tuneButton").style.background = (m_autoButton == true ? "#ff0000":"");
+}
+
+function canvasPointerPos(c,e)
+{
+  var rect = c.getBoundingClientRect();
+  var xpos = (e.clientX - rect.left);
+  m_selFreq = xpos;
+}
+
+function redrawRxTxBars()
+{
+  var rxFreq = parseInt(wsjtx_settings.get("Common/RxFreq"))/3;
+  var txFreq = parseInt(wsjtx_settings.get("Common/TxFreq"))/3;
+
+  console.log("redrawRxTxBars: rx=" + rxFreq + ", tx=" + txFreq);
+
+  ctxrx.fillStyle="#c8c8c8";
+  ctxrx.fillRect(0, 0, crxtx.width, crxtx.height);
+
+  ctxrx.fillStyle="#c80000";
+  ctxrx.fillRect(txFreq,    2, 25, 2);
+  ctxrx.fillRect(txFreq,    4,  2, 4);
+  ctxrx.fillRect(txFreq+23, 4,  2, 4);
+
+  ctxrx.fillStyle="#00c800";
+  ctxrx.fillRect(rxFreq,    12, 25, 2);
+  ctxrx.fillRect(rxFreq,    8,  2, 4);
+  ctxrx.fillRect(rxFreq+23, 8,  2, 4);
+}
+
+function initAllSettings()
+{
+  clickMonitorButton(false);
+  redrawRxTxBars();
+
+  // Common/TxFreq 
+}
+
+/*****************************************************
+   Application start
+ ****************************************************/
 
 let socket=new WebSocket("ws://localhost:14444");
 
+// All settings from wsjtx application
 var wsjtx_settings = new Map();
 
+// We need to keep track of a few ourselves:
+var m_tuneButton = false;
 var m_autoButton = false;
-var m_selFreq;
+var m_selFreq    = 0;
 
-// Initialize rxtx bar
+const palette = [];
+
+// Initialize web application
+
+// Prepare canvas for rx/tx bars
 var crxtx = document.getElementById("rxtx");
 var ctxrx = crxtx.getContext("2d");
 ctxrx.fillStyle="#c8c8c8";
 ctxrx.fillRect(0, 0, crxtx.width, crxtx.height);
 
-
-// Initialize waterfall
+// Prepare canvas for waterfall
 var c = document.getElementById("waterfall");
 var ctx = c.getContext("2d");
 ctx.fillStyle="#000000";
 ctx.fillRect(0, 0, c.width, c.height);
 
+// Add event listeners for lmb/rmb setting rx/tx freq
 c.addEventListener('click', function(e) {
   wsjtx_settings.set("Common/RxFreq",(m_selFreq*3).toString());
   socket.send("Event:RxFreq:" + m_selFreq);
   redrawRxTxBars();
 });
-
 c.addEventListener('contextmenu', function(e) {
   e.preventDefault();
   wsjtx_settings.set("Common/TxFreq",(m_selFreq*3).toString());
@@ -98,17 +307,14 @@ c.addEventListener('contextmenu', function(e) {
   redrawRxTxBars();
 });
 
-/* socket event handlers */
-
+// Add socket event handlers
 socket.onopen = () => {
   console.log("socket open");
 }
-
 socket.onclose = function(e)
 {
   console.log("Server connection lost");
 }
-
 socket.onmessage = (message) =>
 {
   var content = message.data.toString();
@@ -158,6 +364,7 @@ socket.onmessage = (message) =>
     {
       switch(obj)
       {
+        case "tuneButton":     clickTuneButton();       break;
         case "autoButton":     clickAutoButton();       break;
         case "monitorButton":  clickMonitorButton();    break;
       }
@@ -171,69 +378,10 @@ socket.onmessage = (message) =>
   }
 }
 
-/*****************************************************/
-
-function initAllSettings()
-{
-  clickMonitorButton(false);
-  redrawRxTxBars();
-
-  // Common/TxFreq 
-}
-
-/*****************************************************/
-
-function clickMonitorButton(toggle=true)
-{
-  var value = (wsjtx_settings.get("Configuration/MonitorOFF")==='true');
-  if(toggle)
-  {
-    value = value ? false:true;
-    wsjtx_settings.set("Configuration/MonitorOFF", value.toString());
-  }
-  document.getElementById("monitorButton").style.background = value ? "":"#00ff00";
-}
-
-function clickAutoButton()
-{
-  m_autoButton = !m_autoButton;
-  document.getElementById("autoButton").style.background = (m_autoButton == true ? "#ff0000":"");
-}
-
-function canvasPointerPos(c,e)
-{
-  var rect = c.getBoundingClientRect();
-  var xpos = (e.clientX - rect.left);
-  m_selFreq = xpos;
-}
-
-//
-// Draw red/green bars for RX/TX QRG indicators
-//
-
-function redrawRxTxBars()
-{
-  var rxFreq = parseInt(wsjtx_settings.get("Common/RxFreq"))/3;
-  var txFreq = parseInt(wsjtx_settings.get("Common/TxFreq"))/3;
-
-  console.log("redrawRxTxBars: rx=" + rxFreq + ", tx=" + txFreq);
-
-  ctxrx.fillStyle="#c8c8c8";
-  ctxrx.fillRect(0, 0, crxtx.width, crxtx.height);
-
-  ctxrx.fillStyle="#c80000";
-  ctxrx.fillRect(txFreq,    2, 25, 2);
-  ctxrx.fillRect(txFreq,    4,  2, 4);
-  ctxrx.fillRect(txFreq+23, 4,  2, 4);
-
-  ctxrx.fillStyle="#00c800";
-  ctxrx.fillRect(rxFreq,    12, 25, 2);
-  ctxrx.fillRect(rxFreq,    8,  2, 4);
-  ctxrx.fillRect(rxFreq+23, 8,  2, 4);
-
-}
 
 </script>
 
 </body>
 </html>
+
+

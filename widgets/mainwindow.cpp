@@ -2736,7 +2736,6 @@ void MainWindow::closeEvent(QCloseEvent * e)
   mem_jt9->detach();
   Q_EMIT finished ();
   QMainWindow::closeEvent (e);
-  printf("...?\n");
 }
 
 void MainWindow::on_stopButton_clicked()                       //stopButton

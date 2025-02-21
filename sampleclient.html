@@ -23,6 +23,16 @@ input.narrowButton {
 input.button {
   width: 95px;
 }
+input.bigTextButton {
+  width: 40px;
+  font-size: 16px;
+}
+input.number {
+  width: 95px;
+}
+div.seqBlock {
+  margin-bottom: 8px;
+}
 div.panel {
   margin-left: 10px;
   display: flex;
@@ -40,26 +50,34 @@ div.dbMeter {
   margin-right: 10px;
 }
 div.menuColumn {
-  width: 200px;
-  background: #cccccc;
+  width: 230px;
+}
+div.seqColumn {
+  width: 230px;
+  border: 1px #aaaaaa solid;
+  background: #eeeeee;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  justify-content: space-between;
+  width: 250px;
 }
 div.dxBlock {
   width: 100%;
   display: flex;
-  height: 50px;
   text-align: center;
+  margin-bottom: 8px;
 }
 dxBlock.input {
 }
 span.label {
-  margin-right: 20px;
 }
 span.darkDisplay {
   display: block;
   width: 100%;
   background: #000000;
   color: #ffff00;
-  font-size: 20px;
+  font-size: 28px;
   text-align: center;
   padding-bottom: 8px;
   padding-top: 8px;
@@ -122,8 +140,8 @@ CQ LB1DK
 <br />
 
 <div class="menuRow">
-  <input id="cbCqOnly" type="checkbox">
-  <span class="label" onClick="javascript:getElementById('cbCqOnly').click()">CQ Only</span>
+  <input id="cbCQonly" type="checkbox" onClick="socket.send('Event:cbCQonly:click')">
+  <span class="label" onClick="javascript:getElementById('cbCQonly').click()">CQ Only</span>
   <input disabled class="button" id="logButton" type="button" value="Log QSO" onClick="#">
   <input class="button" id="stopButton" type="button" value="Stop" onClick="socket.send('Event:stopButton:click')">
   <input class="button" id="monitorButton" type="button" value="Monitor" onClick="socket.send('Event:monitorButton:click')">
@@ -139,6 +157,8 @@ CQ LB1DK
   </div>
 
   <div class="buttonRow">
+
+
     <input class="narrowButton" id="houndButton" type="button" value="H" onClick="socket.send('Event:houndButton:click')">
     <input class="narrowButton" id="ft4Button" type="button" value="FT4" onClick="socket.send('Event:ft4Button:click')">
     <input class="narrowButton" id="ft8Button" type="button" value="FT8" onClick="socket.send('Event:ft8Button:click')">
@@ -148,52 +168,123 @@ CQ LB1DK
   </div>
   <div class="menuColumn">
     <div>
-      <span class="darkDisplay">14.074 000</span>
+      <span id="labDialFreq" class="darkDisplay">OOB</span>
     </div>
     <div class="dxBlock">
       <div style="width: 50%;">
         <span class="dxDisplay">DX Call</span>
-        <input class="dxText" type="text" id="dxCall">
+        <input class="dxText" type="text" id="dxCallEntry">
       </div>
       <div style="width: 50%;">
         <span class="dxDisplay">DX Grid</span>
-        <input class="dxText" type="text" id="dxGrid">
-      </div>
-    </div>
-    <div class="dxBlock">
-      <div class="dxTextBlock" style="float:left;">
-      </div>
-      <div class="dxTextBlock" style="float:right;">
+        <input class="dxText" type="text" id="dxGridEntry">
       </div>
     </div>
 
+
+   <div style="margin-top: 20px;"></div>
+
     <div class="dxBlock" style="justify-content: space-between;">
       <div>
-        <input class="button" type="button" name="dxlookup" value="Lookup">
+        <input class="button" type="button" id="dxlookup" value="Lookup">
       </div>
       <div>
-        <input class="button" type="button" name="dxadd" value="Add">
+        <input class="button" type="button" id="dxadd" value="Add">
       </div>
     </div>
 
     <div>
-      <span class="darkDisplay">2025 Feb 20<br />11:40:39</span>
+      <span id="labUTC" class="darkDisplay"></span>
     </div>
   </div>
-  <div class="menuColumn">
-    <input id="selPeriod" type="checkbox">
-    <span class="label" onClick="javascript:getElementById('selPeriod').click()">Tx even/1st</span>
+
+  <div class="menuColumn" style="margin-left: 8px;">
+  <div class="dxBlock" style="text-align:left; justify-content: space-between;">
+  <div>
+  <input id="txFirstCheckBox" type="checkbox" onClick="socket.send('Event:txFirstCheckBox:click')">
+  <span class="label" onClick="javascript:getElementById('txFirstCheckBox').click()">Tx even/1st</span>
+  </div>
+  <div style="margin-right: 8px;">
+  <input id="cbHoldTxFreq" type="checkbox" onClick="socket.send('Event:cbHoldTxFreq:click')">
+  <span class="label" onClick="javascript:getElementById('cbHoldTxFreq').click()">Hold Tx Freq</span>
+  </div>
+  </div>
+  <div style="margin-top: 8px;">
+  <span>Tx</span>
+  <input class="number" type="number" min="200" max="5000" value="200" id="TxFreqSpinBox" onChange="socket.send('SetState:TxFreqSpinBox:'+this.value+':int');"> 
+  </div>
+  <div style="margin-top: 8px;">
+  <input style="margin-left:20px;" id="pbR2T" class="bigTextButton" type="button" value="&#9650;" onClick="socket.send('Event:pbR2T:click')">
+  <input id="pbT2R" class="bigTextButton" type="button" value="&#9660;" onClick="socket.send('Event:pbT2R:click')">
+  </div>
+  <div style="margin-top: 8px;">
+  <span>Rx</span>
+  <input class="number" type="number" min="200" max="5000" value="200" id="RxFreqSpinBox" onChange="socket.send('SetState:RxFreqSpinBox:'+this.value+':int');"> 
+  </div>
+  <div style="margin-top: 8px;">
+  <span>Report</span>
+  <input class="number" type="number" min="-50" max="49" value="0" id="rptSpinBox" onChange="socket.send('SetState:rptSpinBox:'+this.value+':int');"> 
+  </div>
+  <div style="margin-top: 8px;">
+  <input id="cbAutoSeq" checked type="checkbox" onClick="toggleAutoSeq(this)">
+  <span class="label" onClick="javascript:getElementById('cbAutoSeq').click()">Auto Seq</span>
+  <select id="respondComboBox" onChange="socket.send('SetState:respondComboBox:'+this.value+':index')">
+  <option value="0">CQ None</option>
+  <option value="1">CQ First</option>
+  <option value="2">CQ Max Dist</option>
+  </select>
+  </div>
+  </div>
+  <div class="seqColumn">
+    <div class="seqBlock">
+      <div>
+        <input type="button" value="Generate Std Msgs">
+      </div>
+    </div>
+    <div class="seqBlock">
+      <div>
+        <input type="text" id="tx1" value="">
+        <input type="radio" id="txrb1" onclick="toggleTxRb(this)">
+        <input type="button" id="b1" value="Tx 1" onclick="socket.send('Event:txb1:click')">
+      </div>
+    </div>
+    <div class="seqBlock">
+      <div>
+        <input type="text" id="tx2" value="">
+        <input type="radio" id="txrb2" onclick="toggleTxRb(this)">
+        <input type="button" id="b2" value="Tx 2" onclick="socket.send('Event:txb1:click')">
+      </div>
+    </div>
+    <div class="seqBlock">
+      <div>
+        <input type="text" id="tx3" value="">
+        <input type="radio" id="txrb3" onclick="toggleTxRb(this)">
+        <input type="button" id="b3" value="Tx 3" onclick="socket.send('Event:txb1:click')">
+      </div>
+    </div>
+    <div class="seqBlock">
+      <div>
+        <input type="text" id="tx4" value="">
+        <input type="radio" id="txrb4" onclick="toggleTxRb(this)">
+        <input type="button" id="b4" value="Tx 4" onclick="socket.send('Event:txb1:click')">
+      </div>
+    </div>
+    <div class="seqBlock">
+      <div>
+        <input type="text" id="tx5" value="">
+        <input type="radio" id="txrb5" onclick="toggleTxRb(this)">
+        <input type="button" id="b5" value="Tx 5" onclick="socket.send('Event:txb1:click')">
+      </div>
+    </div>
+    <div class="seqBlock">
+      <div>
+        <input type="text" id="tx6" value="">
+        <input type="radio" id="txrb6" onclick="toggleTxRb(this)">
+        <input type="button" id="b6" value="Tx 6" onclick="socket.send('Event:txb1:click')">
+      </div>
+    </div>
   </div>
 </div>
-
-<!--
-<div class="menuRow">
-</div>
-
-<div class="menuRow">
-  <input id="callSign" type="text" value="">
-</div>
--->
 
 <br />
 
@@ -228,6 +319,24 @@ function clickTuneButton()
   document.getElementById("tuneButton").style.background = (m_autoButton == true ? "#ff0000":"");
 }
 
+function toggleTxRb(e)
+{
+  document.getElementById("txrb1").checked=false;
+  document.getElementById("txrb2").checked=false;
+  document.getElementById("txrb3").checked=false;
+  document.getElementById("txrb4").checked=false;
+  document.getElementById("txrb5").checked=false;
+  document.getElementById("txrb6").checked=false;
+  e.checked = true;
+  socket.send('Event:'+e.id+':click');
+}
+
+function toggleAutoSeq(e)
+{
+  document.getElementById("respondComboBox").style.visibility = e.checked ? "visible":"hidden";
+  socket.send('Event:cbAutoSeq:click');
+}
+
 function canvasPointerPos(c,e)
 {
   var rect = c.getBoundingClientRect();
@@ -256,10 +365,45 @@ function redrawRxTxBars()
   ctxrx.fillRect(rxFreq+23, 8,  2, 4);
 }
 
+function requestWsjtxState(obj, method, objtype)
+{
+  socket.send("State:" + obj + ":" + method + ":" + objtype);
+}
+
 function initAllSettings()
 {
+  // Request states from wsjtx application
+
+  requestWsjtxState("labDialFreq", "value", "label");
+  requestWsjtxState("txFirstCheckBox", "checked", "bool");
+  requestWsjtxState("cbCQonly", "checked", "bool");
+  requestWsjtxState("cbAutoSeq", "checked", "bool");
+  requestWsjtxState("cbHoldTxFreq", "checked", "bool");
+  requestWsjtxState("dxCallEntry", "value", "text");
+  requestWsjtxState("dxGridEntry", "value", "text");
+  requestWsjtxState("TxFreqSpinBox", "value", "int");
+  requestWsjtxState("RxFreqSpinBox", "value", "int");
+  requestWsjtxState("rptSpinBox", "value", "int");
+  requestWsjtxState("respondComboBox", "value", "index");
+  requestWsjtxState("tx1", "value", "text");
+  requestWsjtxState("tx2", "value", "text");
+  requestWsjtxState("tx3", "value", "text");
+  requestWsjtxState("tx4", "value", "text");
+  requestWsjtxState("tx5", "value", "index");
+  requestWsjtxState("tx6", "value", "text");
+  requestWsjtxState("txrb1", "checked", "bool");
+  requestWsjtxState("txrb2", "checked", "bool");
+  requestWsjtxState("txrb3", "checked", "bool");
+  requestWsjtxState("txrb4", "checked", "bool");
+  requestWsjtxState("txrb5", "checked", "bool");
+  requestWsjtxState("txrb6", "checked", "bool");
+
+
+  // yada yada yada
+
   clickMonitorButton(false);
   redrawRxTxBars();
+
 
   // Common/TxFreq 
 }
@@ -317,65 +461,120 @@ socket.onclose = function(e)
 }
 socket.onmessage = (message) =>
 {
-  var content = message.data.toString();
-  var items=content.split(':');
-  var cmd = items[0] ?? "";
-
-  if(cmd == "Boot")
-  {
-    console.log("Boot command received");
-    initAllSettings();
-  }
-
-  if(items.length == 2)
-  {
-    if(cmd == "WaterFall")
-    {
-      var img = ctx.getImageData(0,0,c.width,c.height-1);
-      ctx.putImageData(img, 0, 1);
+  try {
+    var content = message.data.toString();
+    var items=content.split(':');
+    var cmd = items[0] ?? "";
   
-      var pixels=items[1].split(',');
+    if(cmd == "Boot")
+    {
+      console.log("Boot command received");
+      initAllSettings();
+    }
   
-      for(i=0; i<pixels.length; i++)
-      {
-        var ii = (Number("0x"+pixels[i]));
-        ctx.fillStyle=palette[ii];
-        ctx.fillRect(i, 0, 1, 1);
-      }
-    }
-    else if(cmd == "Palette")
+    if(items.length == 2)
     {
-      const cols = items[1].split(',');
-      for(var i=0; i<(cols.length-1); i++)
+      if(cmd == "WaterFall")
       {
-        palette.push(cols[i]);
+        var img = ctx.getImageData(0,0,c.width,c.height-1);
+        ctx.putImageData(img, 0, 1);
+    
+        var pixels=items[1].split(',');
+    
+        for(i=0; i<pixels.length; i++)
+        {
+          var ii = (Number("0x"+pixels[i]));
+          ctx.fillStyle=palette[ii];
+          ctx.fillRect(i, 0, 1, 1);
+        }
+      }
+      else if(cmd == "Palette")
+      {
+        const cols = items[1].split(',');
+        for(var i=0; i<(cols.length-1); i++)
+        {
+          palette.push(cols[i]);
+        }
       }
     }
-  }
-
-  if(items.length != 3) return;
-
-  if(cmd == "Event")
-  {
-    console.log("Received event: " + content);
-    var obj = items[1];
-    var method = items[2];
-    if(method == "pressed()")
+  
+    if(items.length == 3)
+      {
+      if(cmd == "Event")
+      {
+        console.log("Received event: " + content);
+        var obj = items[1];
+        var method = items[2];
+        if(method == "pressed()")
+        {
+          switch(obj)
+          {
+            case "tuneButton":     clickTuneButton();       break;
+            case "autoButton":     clickAutoButton();       break;
+            case "monitorButton":  clickMonitorButton();    break;
+          }
+        }
+        else if(method == "currentIndexChanged(int)")
+        {
+          requestWsjtxState(obj, "value", "index");
+        }
+        else if(method == "valueChanged(int)")
+        {
+          requestWsjtxState(obj, "value", "int");
+        }
+        else if(method == "textChanged(QString)")
+        {
+          requestWsjtxState(obj, "value", "text");
+        }
+        else if(method == "clicked(bool)")
+        {
+          requestWsjtxState(obj, "checked", "bool");
+        }
+      }
+      else if(cmd == "Settings")
+      {
+        var key = items[1];
+        var value = items[2];
+        wsjtx_settings.set(key,value);
+      }
+    }
+    else if(cmd == "State")
     {
-      switch(obj)
+      var obj = items[1];        // object (txFirstCheckBox)
+      var method = items[2];     // method (checked)
+      var rettype = items[3];    // return type (bool)
+      var state = items[4];      // return value (true)
+  
+  //    console.log("obj="+obj+", state="+state);
+      console.log(content);
+  
+      if(method == "checked" && rettype == "bool")
       {
-        case "tuneButton":     clickTuneButton();       break;
-        case "autoButton":     clickAutoButton();       break;
-        case "monitorButton":  clickMonitorButton();    break;
+        document.getElementById(obj).checked = (state=='true'?true:false);
+      }
+      else if(method == "value" && rettype == "text")
+      {
+        document.getElementById(obj).value = state;
+      }
+      else if(method == "value" && rettype == "label")
+      {
+        document.getElementById(obj).innerText = state;
+      }
+      else if(method == "value" && rettype == "int")
+      {
+        document.getElementById(obj).value = state;
+      }
+      else if(method == "value" && rettype == "index")
+      {
+        document.getElementById(obj).value = state;
+      }
+      else
+      {
+        console.log("unknown rettype: " + rettype);
       }
     }
   }
-  else if(cmd == "Settings")
-  {
-    var key = items[1];
-    var value = items[2];
-    wsjtx_settings.set(key,value);
-  }
+  catch(error){}
 }
 
 
@@ -384,4 +583,6 @@ socket.onmessage = (message) =>
 </body>
 </html>
 
-
+<!--
+dxCallEntry->setText(".."); ved endring, husk ucase alt + trigger på enter
+-->

@@ -1068,7 +1068,76 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 // Find widget event matching the client request
 
   connect(ws, &WebSockets::sendRemoteEvent, this, [this](QString message) {
-    if(message.startsWith("Event:"))
+    if(message.startsWith("SetState:"))
+    {
+      QStringList request = message.split(u':');
+      QString obj = request[1]; //TxFreqSpinBox
+      QString value = request[2]; //602
+      QString valueType = request[3]; //int
+
+      QObject *targetObj = this->centralWidget()->findChild<QObject*>(obj);
+      if(targetObj != nullptr)
+      {
+        if(valueType=="int")
+        { 
+          bool success = false;
+          int intval = value.toInt(&success);
+          if(success)
+          {
+            ((QSpinBox *)targetObj)->setValue(intval);
+          }
+        }
+        else if(valueType=="index")
+        {
+          bool success = false;
+          int intval = value.toInt(&success);
+          if(success)
+          {
+            ((QComboBox *)targetObj)->setCurrentIndex(intval);
+          }
+        }
+      }
+    }
+    else if(message.startsWith("State:"))
+    {
+      QStringList request = message.split(u':');
+      QString obj = request[1];
+      QString method = request[2];
+      QString objtype = request[3];
+      
+      QObject *targetObj = this->centralWidget()->findChild<QObject*>(obj);
+      if(targetObj != nullptr)
+      {
+        QString valResult = "null";
+
+        if(objtype == "bool")
+        {
+          bool res = ((QCheckBox *)targetObj)->isChecked();
+          valResult = res ? "true":"false";
+        }
+        else if(objtype == "text")
+        {
+          valResult = ((QLineEdit *)targetObj)->text();
+        }
+        else if(objtype == "label")
+        {
+          valResult = ((QLabel *)targetObj)->text();
+        }
+        else if(objtype == "int")
+        {
+          int res = ((QSpinBox *)targetObj)->value();
+          valResult = QString::number(res);
+        }
+        else if(objtype == "index")
+        {
+          int res = ((QComboBox *)targetObj)->currentIndex();
+          valResult = QString::number(res);
+        }
+        QString response = QString("State:" + obj + ":" + method + ":" + objtype + ":" + valResult);
+        ws->writeToClient(response);
+      }
+    }
+    else if(message.startsWith("Event:"))
     {
       message = message.remove(QRegExp("^Event:"));
       printf("Event received: %s\n", message.toStdString().c_str());
@@ -2530,6 +2599,10 @@ void MainWindow::displayDialFrequency ()
 
   update_dynamic_property (ui->labDialFreq, "oob", !valid);
   ui->labDialFreq->setText (Radio::pretty_frequency_MHz_string (dial_frequency));
+
+  QString resp = QString("State:labDialFreq:value:label:") + QString(ui->labDialFreq->text());
+  if(ws) ws->writeToClient(resp);
+  
 }
 
 void MainWindow::statusChanged()
@@ -4988,6 +5061,10 @@ void MainWindow::guiUpdate()
     QString utc = t.date().toString("yyyy MMM dd") + "\n " +
       t.time().toString() + " ";
     ui->labUTC->setText(utc);
+
+    QString resp = QString("State:labUTC:value:label:") + t.date().toString("yyyy-MM-dd") + " " + t.time().toString("HH.mm.ss");
+    if(ws) ws->writeToClient(resp);
+
     if(m_bBestSPArmed and (m_dateTimeBestSP.secsTo(t) >= 120)) on_pbBestSP_clicked(); //BestSP timeout
     if(!m_monitoring and !m_diskData) ui->signal_meter_widget->setValue(0,0);
     m_sec0=nsec;

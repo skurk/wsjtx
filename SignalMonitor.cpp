@@ -17,6 +17,7 @@ void SignalMonitor::Notify()
   // default ignore null objects and destroy signals to reduce overhead
   if(!objName.isEmpty() && !methodSig.contains("destroy"))
   {
+    printf("%s->%s\n", objName.toStdString().c_str(), methodSig.toStdString().c_str());
     emit sendLocalEvent(objName, methodSig);
   }
 }

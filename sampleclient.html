@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <style>
 body {
@@ -29,6 +30,9 @@ input.bigTextButton {
 }
 input.number {
   width: 95px;
+}
+div.decodeBlock {
+  background: #00ff00;
 }
 div.seqBlock {
   margin-bottom: 8px;
@@ -115,26 +119,199 @@ textarea {
   width: 100%;
   background: #d8d8d8;
 }
+
+.listbox-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #eee;
+}
+
+[role="listbox"] {
+  margin: 0 0 0 0;
+  padding: 0;
+  min-height: 18em;
+  border: 1px solid #aaa;
+  background: white;
+}
+
+[role="listbox"]#ss_elem_list {
+  grid-column: 1;
+  white-space: pre;
+  font-family: monospace;
+  position: relative;
+  max-height: 18em;
+  overflow-y: auto;
+}
+[role="listbox"]#ss_elem_list2 {
+  grid-column: 2;
+  white-space: pre;
+  font-family: monospace;
+  position: relative;
+  max-height: 18em;
+  overflow-y: auto;
+}
+
+[role="listbox"] + *,
+.listbox-label + * {
+  margin-top: 1em;
+}
+
+[role="group"] {
+  margin: 0;
+  padding: 0;
+}
+
+[role="group"] > [role="presentation"] {
+  display: block;
+  margin: 0;
+  padding: 0 0.5em;
+  font-weight: bold;
+  line-height: 2;
+  background-color: #ccc;
+}
+
+[role="option"] {
+  position: relative;
+  display: block;
+  margin: 2px;
+  padding: 2px 1em 2px 1.5em;
+  line-height: 1.8em;
+  cursor: pointer;
+}
+
+[role="listbox"]:focus [role="option"].focused {
+  background: #bde4ff;
+}
+
+[role="listbox"]:focus [role="option"].focused,
+[role="option"]:hover {
+  outline: none;
+  outline: 2px solid currentcolor;
+}
+
+.move-right-btn span.checkmark::after {
+  content: " →";
+}
+
+.move-left-btn span.checkmark::before {
+  content: "← ";
+}
+
+[role="option"][aria-selected="true"] span.checkmark::before {
+  position: absolute;
+  left: 0.5em;
+  content: "✓";
+}
+
+button[aria-haspopup="listbox"] {
+  position: relative;
+  padding: 5px 10px;
+  width: 150px;
+  border-radius: 0;
+  text-align: left;
+}
+
+button[aria-haspopup="listbox"]::after {
+  position: absolute;
+  right: 5px;
+  top: 10px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-top-color: currentcolor;
+  border-bottom: 0;
+  content: "";
+}
+
+button[aria-haspopup="listbox"][aria-expanded="true"]::after {
+  position: absolute;
+  right: 5px;
+  top: 10px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-top: 0;
+  border-bottom-color: currentcolor;
+  content: "";
+}
+
+button[aria-haspopup="listbox"] + [role="listbox"] {
+  position: absolute;
+  margin: 0;
+  width: 9.5em;
+  max-height: 10em;
+  border-top: 0;
+  overflow-y: auto;
+}
+
+[role="toolbar"] {
+  display: flex;
+}
+
+[role="toolbar"] > * {
+  border: 1px solid #aaa;
+  background: #ccc;
+}
+
+[role="toolbar"] > [aria-disabled="false"]:focus {
+  background-color: #eee;
+}
+
+button {
+  font-size: inherit;
+}
+
+button[aria-disabled="true"] {
+  opacity: 0.5;
+}
+
+.annotate {
+  color: #366ed4;
+  font-style: italic;
+}
+
+.hidden {
+  display: none;
+}
+
+.offscreen {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+
+
 </style>
-<body>
+<body unselectable="on" onselectstart="return false;">
 
 <div class="main">
 <div>
-  <canvas id="rxtx" width="1024" height="16">
+  <canvas id="rxtx" width="256" height="16">
 </div>
 <div>
-  <canvas id="waterfall" width="1024" height="128" onMouseMove="canvasPointerPos(this,event)" style="width:100%; height: 128px;"></canvas>
+  <canvas id="waterfall" width="256" height="128" onMouseMove="canvasPointerPos(this,event)" style="width:100%; height: 128px;"></canvas>
 </div>
+
 <br />
-<div>
-  <textarea ondblclick="dblClickEvt(this)" readonly id="lb" rows="10" style="width: 500px;">
-CQ LB5SH
-CQ LA9KOA
-CQ LB5RH
-CQ LB2PJ
-CQ LB1DK
-</textarea>
-  <textarea readonly id="rb" rows="10" style="width: 500px;">LB5SH QSY QRM</textarea>
+
+<div class="listbox-area">
+  <div>
+    <ul id="ss_elem_list" tabindex="0" role="listbox" aria-labelledby="ss_elem">
+    </ul>
+  </div>
+  <div>
+    <ul id="ss_elem_list2" tabindex="0" role="listbox" aria-labelledby="ss_elem">
+    </ul>
+  </div>
 </div>
 
 <br />
@@ -290,7 +467,16 @@ CQ LB1DK
 
 </div>
 
+<!-- ideer:
+
+* Subscribe på de events som er av interesse, slippe "støy"
+
+-->
+
+<script src="aria.js"></script>
 <script>
+
+
 
 /*****************************************************
    Support functions
@@ -316,7 +502,7 @@ function clickAutoButton()
 function clickTuneButton()
 {
   m_tuneButton = !m_tuneButton;
-  document.getElementById("tuneButton").style.background = (m_autoButton == true ? "#ff0000":"");
+  document.getElementById("tuneButton").style.background = (m_tuneButton == true ? "#ff0000":"");
 }
 
 function toggleTxRb(e)
@@ -340,16 +526,15 @@ function toggleAutoSeq(e)
 function canvasPointerPos(c,e)
 {
   var rect = c.getBoundingClientRect();
-  var xpos = (e.clientX - rect.left);
-  m_selFreq = xpos;
+  var xpos = e.clientX - rect.left;
+  var aspect = c.width/1024.0;
+  m_selFreq = Math.floor(aspect*xpos);
 }
 
 function redrawRxTxBars()
 {
-  var rxFreq = parseInt(wsjtx_settings.get("Common/RxFreq"))/3;
-  var txFreq = parseInt(wsjtx_settings.get("Common/TxFreq"))/3;
-
-  console.log("redrawRxTxBars: rx=" + rxFreq + ", tx=" + txFreq);
+  var txFreq = document.getElementById("TxFreqSpinBox").value;
+  var rxFreq = document.getElementById("RxFreqSpinBox").value;
 
   ctxrx.fillStyle="#c8c8c8";
   ctxrx.fillRect(0, 0, crxtx.width, crxtx.height);
@@ -398,14 +583,37 @@ function initAllSettings()
   requestWsjtxState("txrb5", "checked", "bool");
   requestWsjtxState("txrb6", "checked", "bool");
 
+  // request waterfall pixels per block 1/2/4
 
-  // yada yada yada
+  // aand yada yada yada
 
   clickMonitorButton(false);
   redrawRxTxBars();
 
 
   // Common/TxFreq 
+}
+
+function addToDecodedBrowserLeft(input)
+{
+  var leftList = document.getElementById("ss_elem_list");
+  var newLi = document.createElement("li");
+  newLi.role = "option";
+  newLi.id = "o";
+  newLi.appendChild(document.createTextNode(input));
+  leftList.appendChild(newLi);
+  leftList.scrollTop = leftList.scrollHeight - leftList.clientHeight;
+}
+
+function addToDecodedBrowserRight(input)
+{
+  var leftList = document.getElementById("ss_elem_list2");
+  var newLi = document.createElement("li");
+  newLi.role = "option";
+  newLi.id = "l";
+  newLi.appendChild(document.createTextNode(input));
+  leftList.appendChild(newLi);
+  leftList.scrollTop = leftList.scrollHeight - leftList.clientHeight;
 }
 
 /*****************************************************
@@ -440,14 +648,14 @@ ctx.fillRect(0, 0, c.width, c.height);
 
 // Add event listeners for lmb/rmb setting rx/tx freq
 c.addEventListener('click', function(e) {
-  wsjtx_settings.set("Common/RxFreq",(m_selFreq*3).toString());
-  socket.send("Event:RxFreq:" + m_selFreq);
+//  socket.send("SetState:RxFreqSpinBox:" + m_selFreq + ":int");
+  document.getElementById("RxFreqSpinBox").value = m_selFreq;
   redrawRxTxBars();
 });
 c.addEventListener('contextmenu', function(e) {
   e.preventDefault();
-  wsjtx_settings.set("Common/TxFreq",(m_selFreq*3).toString());
-  socket.send("Event:RxFreq:" + m_selFreq);
+  document.getElementById("TxFreqSpinBox").value = m_selFreq;
+//  socket.send("SetState:TxFreqSpinBox:" + m_selFreq + ":int");
   redrawRxTxBars();
 });
 
@@ -471,6 +679,11 @@ socket.onmessage = (message) =>
       console.log("Boot command received");
       initAllSettings();
     }
+
+    if(cmd == "DecodedLeft")
+    {
+      addToDecodedBrowserLeft(items[1] ?? "");
+    }
   
     if(items.length == 2)
     {
@@ -479,13 +692,13 @@ socket.onmessage = (message) =>
         var pixels=items[1].split(',');
         if(c.width != pixels.length) 
         {
-          console.log("waterfall width changed");
           c.width = pixels.length;
+          crxtx.width = pixels.length;
+          redrawRxTxBars();
         }
 
         var img = ctx.getImageData(0,0,c.width,c.height-1);
         ctx.putImageData(img, 0, 1);
-    
     
         for(i=0; i<pixels.length; i++)
         {
@@ -508,7 +721,7 @@ socket.onmessage = (message) =>
       {
       if(cmd == "Event")
       {
-        console.log("Received event: " + content);
+//        console.log("Received event: " + content);
         var obj = items[1];
         var method = items[2];
         if(method == "pressed()")
@@ -532,6 +745,10 @@ socket.onmessage = (message) =>
         {
           requestWsjtxState(obj, "value", "text");
         }
+        else if(method == "textChanged()")
+        {
+          requestWsjtxState(obj, "value", "text");
+        }
         else if(method == "clicked(bool)")
         {
           requestWsjtxState(obj, "checked", "bool");
@@ -551,12 +768,18 @@ socket.onmessage = (message) =>
       var rettype = items[3];    // return type (bool)
       var state = items[4];      // return value (true)
   
-  //    console.log("obj="+obj+", state="+state);
-      console.log(content);
+//      console.log(content);
   
       if(method == "checked" && rettype == "bool")
       {
         document.getElementById(obj).checked = (state=='true'?true:false);
+      }
+      else if(obj == "decodedTextBrowser" && rettype == "text")
+      {
+//        console.log("Received decoded text: " + state);
+
+//        document.getElementById(obj).value = state;
+        return;
       }
       else if(method == "value" && rettype == "text")
       {
@@ -583,6 +806,13 @@ socket.onmessage = (message) =>
   catch(error){}
 }
 
+/*
+for(i=0;i<20;i++)
+{
+  addToDecodedBrowserLeft("test "+i)
+  addToDecodedBrowserRight("fucktest "+i)
+}
+*/
 
 </script>
 

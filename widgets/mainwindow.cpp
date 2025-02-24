@@ -1115,6 +1115,20 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
           bool res = ((QCheckBox *)targetObj)->isChecked();
           valResult = res ? "true":"false";
         }
+        else if(objtype == "text" && obj == "decodedTextBrowser")
+        {
+/*
+          QStringList decoded = ui->decodedTextBrowser->document()->toPlainText().split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+          for(const auto &i:decoded)
+          {
+//            printf("Test: %s\n", i.toStdString().c_str());
+            ws->writeToClient("DecodedLeft:" + s.toStdString().c_str());
+          }
+//           valResult = QString("Decoded text here");
+//          valResult = ((QLineEdit *)targetObj)->text();
+*/
+           return;
+        }
         else if(objtype == "text")
         {
           valResult = ((QLineEdit *)targetObj)->text();
@@ -1765,8 +1779,6 @@ void MainWindow::dataSink(qint64 frames)
     ui->decodedTextBrowser->displayDecodedText (decodedtext, m_config.my_callsign(),
           m_mode, m_config.DXCC(), m_logBook, m_currentBand, m_config.ppfx());
 
-    printf("ui->decodedTextBrowser: %s\n", t.toStdString().c_str());
-
     if (ui->measure_check_box->isChecked ()) {
       // Append results text to file "fmt.all".
       QFile f {m_config.writeable_data_dir ().absoluteFilePath ("fmt.all")};
@@ -1861,7 +1873,10 @@ void MainWindow::dataSink(qint64 frames)
         t = t.asprintf("%9.6f  %5.2f %7d %7.1f %7d %7d %7d %7.1f %7.1f",hour,xlevel,
                        nDopTotal,width,echocom_.nsum,nqual,qRound(dfreq),sigdb,dBerr);
         t = t0 + t;
-        if (ui) ui->decodedTextBrowser->insertText(t);
+        if (ui)
+        {
+          ui->decodedTextBrowser->insertText(t);
+        }
         t=t1+t;
         write_all("Rx",t);
       }
@@ -5115,6 +5130,7 @@ void MainWindow::startTx2()
           m_config.bands ()->find (m_freqNominal);
         t=beacon_start_time (m_TRperiod / 2) + ' ' + t.rightJustified (66, '-');
         ui->decodedTextBrowser->insertText(t);
+        if(ws)ws->writeToClient(QString("Decoded:") + t);
       }
       write_all("Tx",m_currentMessage);
     }
@@ -8678,6 +8694,7 @@ void MainWindow::replayDecodes ()
 
 void MainWindow::postDecode (bool is_new, QString const& message)
 {
+  if(ws)ws->writeToClient(QString("DecodedLeft:") + message.toStdString().c_str());
   auto const& decode = message.trimmed ();
   auto const& parts = decode.left (22).split (' ', SkipEmptyParts);
   if (parts.size () >= 5)
@@ -8745,6 +8762,7 @@ void MainWindow::p1ReadFromStdout()                        //p1readFromStdout
               m_config.bands ()->find (m_dialFreqRxWSPR);
           t=beacon_start_time (-m_TRperiod / 2) + ' ' + t.rightJustified (66, '-');
           ui->decodedTextBrowser->insertText(t);
+          if(ws)ws->writeToClient(QString("Decoded:") + t);
         }
         killFileTimer.start (45*1000); //Kill in 45s (for slow modes)
       }

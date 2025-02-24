@@ -67,6 +67,9 @@ void WebSockets::onNewConnection()
 
 void WebSockets::writeToClient(QString message)
 {
+  if(!message.contains("WaterFall"))
+    printf("writeToClient(\"%s\");\n", message.toStdString().c_str());
+
   foreach(QWebSocket *c,  clients)
   {
     if(c)

@@ -684,8 +684,11 @@ socket.onmessage = (message) =>
     {
       addToDecodedBrowserLeft(items[1] ?? "");
     }
-  
-    if(items.length == 2)
+    else if(cmd == "DecodedRight")
+    {
+      addToDecodedBrowserRight(items[1] ?? "");
+    }
+    else if(items.length == 2)
     {
       if(cmd == "WaterFall")
       {

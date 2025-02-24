@@ -1205,6 +1205,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   connect (ui->actionExit, &QAction::triggered, this, [this] {
     if(ws)
     {
+      printf("Debug: ActionExit closing WebSocket server\n");
       ws->closeAllConnections();
       ws->closeServer();
     }
@@ -1296,14 +1297,6 @@ void MainWindow::on_the_minute ()
 //--------------------------------------------------- MainWindow destructor
 MainWindow::~MainWindow()
 {
-  if(ws)
-  {
-    ws->closeAllConnections();
-    ws->closeServer();
-    delete ws;
-    ws = NULL;
-  }
-
   if(m_astroWidget) m_astroWidget.reset ();
   auto fname {QDir::toNativeSeparators(m_config.writeable_data_dir ().absoluteFilePath ("wsjtx_wisdom.dat"))};
   fftwf_export_wisdom_to_filename (fname.toLocal8Bit ());
@@ -4177,6 +4170,9 @@ void MainWindow::readFromStdout()                             //readFromStdout
         // This msg is within 10 hertz of our tuned frequency, or a JT4 or JT65 avg,
         // or contains MyCall
         if(!m_bBestSPArmed or m_mode!="FT4") {
+
+          //if(ws)ws->writeToClient(QString("DecodedRight:") + decodedtext0.toStdString().c_str());
+
           ui->decodedTextBrowser2->displayDecodedText (decodedtext0, m_config.my_callsign (), m_mode, m_config.DXCC (),
                 m_logBook, m_currentBand, m_config.ppfx (), false, false, 0.0, bDisplayPoints, m_points);
         }

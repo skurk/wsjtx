@@ -16,8 +16,8 @@ WebSockets::WebSockets(quint16 port, QObject *parent) :
   if(socketServer->listen(QHostAddress::Any, port))
   {
     printf("WebSocket constructor: init port=%d\n", (int)port);
-    connect(socketServer, &QWebSocketServer::newConnection,
-            this, &WebSockets::onNewConnection);
+    connect(socketServer, &QWebSocketServer::newConnection, this, &WebSockets::onNewConnection);
+    connect(socketServer, &QWebSocketServer::closed, this, &WebSockets::closed);
   }
 }
 
@@ -37,8 +37,8 @@ void WebSockets::onNewConnection()
   current = conn;
   connect(conn, &QWebSocket::textMessageReceived,
           this, &WebSockets::textMessageReceived);
-  connect(conn, &QWebSocket::disconnected,
-          this, &WebSockets::disconnected);
+//  connect(conn, &QWebSocket::disconnected,
+//          this, &WebSockets::disconnected);
   clients << conn;
 
   // Init connection by dumping settings to client
@@ -72,14 +72,14 @@ void WebSockets::writeToClient(QString message)
 
   foreach(QWebSocket *c,  clients)
   {
-    if(c)
+    if(c && c->isValid())
     {
       c->sendTextMessage(message);
       c->flush();
     }
     else
     {
-      printf("Unable to send to client (socket not open)\n");
+//      printf("Unable to send to client (socket not open)\n");
     }
   }
 }
@@ -94,18 +94,26 @@ void WebSockets::textMessageReceived(QString message)
   }
 }
 
-void WebSockets::disconnected()
+void WebSockets::socketDisconnected()
 {
+  printf("Client disconnected\n");
   QWebSocket *c = qobject_cast<QWebSocket *>(sender());
-  QMetaObject::invokeMethod(c, "close", Qt::DirectConnection);
-  c->deleteLater();
+  if(c)
+  {
+    clients.removeAll(c);
+    c->deleteLater();
+  }
 }
 
 void WebSockets::closeAllConnections()
 {
-  foreach(QWebSocket *w, clients)
+  foreach(QWebSocket *c,  clients)
   {
-    QMetaObject::invokeMethod(w, "close", Qt::DirectConnection);
+    if(c)
+    {
+      clients.removeAll(c);
+      c->deleteLater();
+    }
   }
 }
 

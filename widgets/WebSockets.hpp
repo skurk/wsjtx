@@ -28,6 +28,7 @@ class WebSockets : public QObject
   public slots:
     void sendLocalEvent(QString, QString);
   signals:
+    void closed();
     void sendRemoteEvent(QString);
     void autoButtonClicked();
     void haltButtonClicked();
@@ -37,7 +38,7 @@ class WebSockets : public QObject
   private slots:
     void onNewConnection();
     void textMessageReceived(QString message);
-    void disconnected();
+    void socketDisconnected();
 };
 
 #endif

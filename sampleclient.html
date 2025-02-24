@@ -121,6 +121,7 @@ textarea {
 }
 
 .listbox-area {
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
@@ -183,13 +184,14 @@ textarea {
 }
 
 [role="listbox"]:focus [role="option"].focused {
-  background: #bde4ff;
+  border: 0px;
+//  background: #bde4ff;
 }
 
 [role="listbox"]:focus [role="option"].focused,
 [role="option"]:hover {
   outline: none;
-  outline: 2px solid currentcolor;
+//  outline: 2px solid currentcolor;
 }
 
 .move-right-btn span.checkmark::after {
@@ -295,7 +297,7 @@ button[aria-disabled="true"] {
 
 <div class="main">
 <div>
-  <canvas id="rxtx" width="256" height="16">
+  <canvas id="rxtx" width="256" height="16" style="width:100%;">
 </div>
 <div>
   <canvas id="waterfall" width="256" height="128" onMouseMove="canvasPointerPos(this,event)" style="width:100%; height: 128px;"></canvas>
@@ -531,10 +533,13 @@ function canvasPointerPos(c,e)
   m_selFreq = Math.floor(aspect*xpos);
 }
 
+// TODO: Obtain wsjtx setting: ui->widePlot->binsPerPixel()
 function redrawRxTxBars()
 {
   var txFreq = document.getElementById("TxFreqSpinBox").value;
   var rxFreq = document.getElementById("RxFreqSpinBox").value;
+
+  console.log("redrawRxTxBars: txFreq="+txFreq+", rxFreq="+rxFreq);
 
   ctxrx.fillStyle="#c8c8c8";
   ctxrx.fillRect(0, 0, crxtx.width, crxtx.height);
@@ -596,24 +601,37 @@ function initAllSettings()
 
 function addToDecodedBrowserLeft(input)
 {
+  var callReady = false;
+  if(input.includes(" CQ ")) callReady = true;
+  if(input.includes(" RR73")) callReady = true;
+  if(input.includes(" 73")) callReady = true;
+
   var leftList = document.getElementById("ss_elem_list");
   var newLi = document.createElement("li");
   newLi.role = "option";
   newLi.id = "o";
   newLi.appendChild(document.createTextNode(input));
+  newLi.style.background = (callReady?"#00cc00":"");
+  newLi.onclick = function() {
+    socket.send("Call:"+this.innerHTML);
+  };
+
   leftList.appendChild(newLi);
   leftList.scrollTop = leftList.scrollHeight - leftList.clientHeight;
 }
 
 function addToDecodedBrowserRight(input)
 {
-  var leftList = document.getElementById("ss_elem_list2");
-  var newLi = document.createElement("li");
-  newLi.role = "option";
-  newLi.id = "l";
-  newLi.appendChild(document.createTextNode(input));
-  leftList.appendChild(newLi);
-  leftList.scrollTop = leftList.scrollHeight - leftList.clientHeight;
+  var rightList = document.getElementById("ss_elem_list2");
+  var newRi = document.createElement("li");
+  newRi.role = "option";
+  newRi.id = "l";
+  newRi.appendChild(document.createTextNode(input));
+  newRi.onclick = function() {
+    socket.send("Call:"+this.innerHTML);
+  };
+  rightList.appendChild(newLi);
+  rightList.scrollTop = rightList.scrollHeight - rightList.clientHeight;
 }
 
 /*****************************************************
@@ -673,11 +691,14 @@ socket.onmessage = (message) =>
     var content = message.data.toString();
     var items=content.split(':');
     var cmd = items[0] ?? "";
+
+//    console.log(content);
   
     if(cmd == "Boot")
     {
       console.log("Boot command received");
       initAllSettings();
+      return;
     }
 
     if(cmd == "DecodedLeft")
@@ -724,16 +745,16 @@ socket.onmessage = (message) =>
       {
       if(cmd == "Event")
       {
-//        console.log("Received event: " + content);
         var obj = items[1];
         var method = items[2];
-        if(method == "pressed()")
+        if(method == "pressed()" || method == "toggled(bool)")
         {
           switch(obj)
           {
             case "tuneButton":     clickTuneButton();       break;
-            case "autoButton":     clickAutoButton();       break;
             case "monitorButton":  clickMonitorButton();    break;
+            case "autoButton":
+                                   clickAutoButton();       break;
           }
         }
         else if(method == "currentIndexChanged(int)")
@@ -780,7 +801,6 @@ socket.onmessage = (message) =>
       else if(obj == "decodedTextBrowser" && rettype == "text")
       {
 //        console.log("Received decoded text: " + state);
-
 //        document.getElementById(obj).value = state;
         return;
       }
@@ -806,16 +826,12 @@ socket.onmessage = (message) =>
       }
     }
   }
-  catch(error){}
+  catch(error)
+  {
+    console.log("Shit got fucked up");
+    console.log(error);
+  }
 }
-
-/*
-for(i=0;i<20;i++)
-{
-  addToDecodedBrowserLeft("test "+i)
-  addToDecodedBrowserRight("fucktest "+i)
-}
-*/
 
 </script>
 

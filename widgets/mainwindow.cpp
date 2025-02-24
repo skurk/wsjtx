@@ -1098,6 +1098,14 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
         }
       }
     }
+    else if(message.startsWith("Call:"))
+    {
+      QStringList request = message.split(u':');
+      QString callInfo = request[1];
+      DecodedText recvMsg {callInfo.trimmed().left(61).remove("TU; ")};
+      m_bDoubleClicked = true;
+      processMessage(recvMsg);
+    }
     else if(message.startsWith("State:"))
     {
       QStringList request = message.split(u':');
@@ -1115,8 +1123,14 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
           bool res = ((QCheckBox *)targetObj)->isChecked();
           valResult = res ? "true":"false";
         }
+        else if(objtype == "text" && obj == "decodedTextBrowser2")
+        {
+          printf("..ignored..\n");
+          return;
+        }
         else if(objtype == "text" && obj == "decodedTextBrowser")
         {
+          printf("..ignored..\n");
 /*
           QStringList decoded = ui->decodedTextBrowser->document()->toPlainText().split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
           for(const auto &i:decoded)
@@ -1127,7 +1141,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 //           valResult = QString("Decoded text here");
 //          valResult = ((QLineEdit *)targetObj)->text();
 */
-           return;
+          return;
         }
         else if(objtype == "text")
         {
@@ -2263,7 +2277,10 @@ void MainWindow::monitor (bool state)
   ui->monitorButton->setChecked (state);
   if (state) {
     m_diskData = false; // no longer reading WAV files
-    if (!m_monitoring) Q_EMIT resumeAudioInputStream ();
+    if (!m_monitoring) 
+    {
+      Q_EMIT resumeAudioInputStream ();
+    }
   } else {
     Q_EMIT suspendAudioInputStream ();
   }
@@ -4076,6 +4093,7 @@ void MainWindow::readFromStdout()                             //readFromStdout
 //Right (Rx Frequency) window
       bool bDisplayRight=bAvgMsg;
       int audioFreq=decodedtext.frequencyOffset();
+
       if(m_mode=="FT8" or m_mode=="FT4" or m_mode=="FST4" or m_mode=="Q65") {
         int ftol=10;
         if(m_mode=="Q65") ftol=ui->sbFtol->value();
@@ -4167,12 +4185,15 @@ void MainWindow::readFromStdout()                             //readFromStdout
       }
 
       if (bDisplayRight) {
+
+        if(ws)
+        {
+          ws->writeToClient(QString("DecodedRight:") +decodedtext0.string().toStdString().c_str());
+        }
+
         // This msg is within 10 hertz of our tuned frequency, or a JT4 or JT65 avg,
         // or contains MyCall
         if(!m_bBestSPArmed or m_mode!="FT4") {
-
-          //if(ws)ws->writeToClient(QString("DecodedRight:") + decodedtext0.toStdString().c_str());
-
           ui->decodedTextBrowser2->displayDecodedText (decodedtext0, m_config.my_callsign (), m_mode, m_config.DXCC (),
                 m_logBook, m_currentBand, m_config.ppfx (), false, false, 0.0, bDisplayPoints, m_points);
         }
@@ -5409,6 +5430,7 @@ void MainWindow::doubleClickOnCall(Qt::KeyboardModifiers modifiers)
     }
     return;
   }
+  QString wut = cursor.block().text().trimmed().left(61).remove("TU; ");
   DecodedText message {cursor.block().text().trimmed().left(61).remove("TU; ")};
   m_bDoubleClicked = true;
   processMessage (message, modifiers);

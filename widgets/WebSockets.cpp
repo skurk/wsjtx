@@ -37,8 +37,6 @@ void WebSockets::onNewConnection()
   current = conn;
   connect(conn, &QWebSocket::textMessageReceived,
           this, &WebSockets::textMessageReceived);
-//  connect(conn, &QWebSocket::disconnected,
-//          this, &WebSockets::disconnected);
   clients << conn;
 
   // Init connection by dumping settings to client

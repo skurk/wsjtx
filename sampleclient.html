@@ -142,6 +142,7 @@ textarea {
   grid-column: 1;
   white-space: pre;
   font-family: monospace;
+  font-size: 12px;
   position: relative;
   max-height: 18em;
   overflow-y: auto;
@@ -150,6 +151,7 @@ textarea {
   grid-column: 2;
   white-space: pre;
   font-family: monospace;
+  font-size: 12px;
   position: relative;
   max-height: 18em;
   overflow-y: auto;
@@ -539,8 +541,6 @@ function redrawRxTxBars()
   var txFreq = document.getElementById("TxFreqSpinBox").value;
   var rxFreq = document.getElementById("RxFreqSpinBox").value;
 
-  console.log("redrawRxTxBars: txFreq="+txFreq+", rxFreq="+rxFreq);
-
   ctxrx.fillStyle="#c8c8c8";
   ctxrx.fillRect(0, 0, crxtx.width, crxtx.height);
 
@@ -630,7 +630,7 @@ function addToDecodedBrowserRight(input)
   newRi.onclick = function() {
     socket.send("Call:"+this.innerHTML);
   };
-  rightList.appendChild(newLi);
+  rightList.appendChild(newRi);
   rightList.scrollTop = rightList.scrollHeight - rightList.clientHeight;
 }
 
@@ -815,6 +815,7 @@ socket.onmessage = (message) =>
       else if(method == "value" && rettype == "int")
       {
         document.getElementById(obj).value = state;
+        redrawRxTxBars();
       }
       else if(method == "value" && rettype == "index")
       {
